@@ -5,7 +5,6 @@ UniMarket is a student marketplace that allows university students to buy and se
 ## Team Members
 
 - Okoro Osahon
-- Jerson Porras
 - Ariane Arias Peralta
 - Nephi Imo
 - Assumpta Chidinma Okpanachi
