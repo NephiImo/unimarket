@@ -34,7 +34,7 @@ export default function Navbar() {
             </a>
 
             <a
-              href="/sell"
+              href="/listings/new"
               className="rounded-full bg-[#c96f52] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#b85f45]"
             >
               Sell an Item
@@ -74,7 +74,7 @@ export default function Navbar() {
               </a>
 
               <a
-                href="/sell"
+                href="/listings/new"
                 onClick={() => setIsOpen(false)}
                 className="mt-2 rounded-full bg-[#c96f52] px-5 py-3 text-center text-sm font-semibold text-white hover:bg-[#b85f45]"
               >
@@ -87,4 +87,5 @@ export default function Navbar() {
     </nav>
   );
 }
+
 

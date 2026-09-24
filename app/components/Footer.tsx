@@ -39,7 +39,7 @@ export default function Footer() {
               </a>
 
               <a
-                href="/sell"
+                href="/listings/new"
                 className="text-sm text-[#746963] transition-colors hover:text-[#c96f52]"
               >
                 Sell an Item
@@ -57,4 +57,5 @@ export default function Footer() {
     </footer>
   );
 }
+
 

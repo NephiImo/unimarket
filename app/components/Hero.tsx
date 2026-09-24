@@ -25,7 +25,7 @@ export default function Hero() {
             </a>
 
             <a
-              href="/sell"
+              href="/listings/new"
               className="rounded-full border border-[#c96f52] px-7 py-3.5 text-center text-sm font-semibold text-[#c96f52] transition-colors hover:bg-[#ebc8ba]/40"
             >
               Sell an Item
