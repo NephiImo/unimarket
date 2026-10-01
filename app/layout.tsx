@@ -1,26 +1,35 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import type { ReactNode } from "react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import "./globals.css";
 
 const inter = Inter({
-  variable: "--font-inter",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "UniMarket | Student Marketplace",
-  description:
-    "Buy, sell, and connect with students on your campus through UniMarket.",
+  title: "UniMarket",
+  description: "A student marketplace for buying and selling on campus.",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body>{children}</body>
+    <html lang="en">
+      <body className={`${inter.className} min-h-screen bg-[#F6F1EA] text-[#352B28]`}>
+        <div className="flex min-h-screen flex-col">
+          <Header />
+
+          <main className="flex-1">{children}</main>
+
+          <Footer />
+        </div>
+      </body>
     </html>
   );
 }
