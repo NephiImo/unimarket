@@ -12,6 +12,7 @@ export type Listing = {
     status: string;
     created_at: Date;
     category_name?: string;
+    seller_name?: string;
 };
 
 export type CreateListingInput = {
@@ -42,7 +43,8 @@ export async function getListings(
         return sql<Listing[]>`
       SELECT
         l.*,
-        c.name AS category_name
+        c.name AS category_name,
+        u.name AS seller_name
       FROM listings l
       JOIN categories c ON c.id = l.category_id
       WHERE l.title ILIKE ${"%" + search + "%"}
@@ -91,9 +93,11 @@ export async function getListingById(
     const listings = await sql<Listing[]>`
     SELECT
       l.*,
-      c.name AS category_name
+      c.name AS category_name,
+      u.name AS seller_name
     FROM listings l
     JOIN categories c ON c.id = l.category_id
+    JOIN users u ON u.id = l.user_id
     WHERE l.id = ${id}
     LIMIT 1
   `;
