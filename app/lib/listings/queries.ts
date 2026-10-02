@@ -47,7 +47,9 @@ export async function getListings(
         u.name AS seller_name
       FROM listings l
       JOIN categories c ON c.id = l.category_id
-      WHERE l.title ILIKE ${"%" + search + "%"}
+      JOIN users u ON u.id = l.user_id
+      WHERE l.status = 'active'
+        AND l.title ILIKE ${"%" + search + "%"}
         AND l.category_id = ${categoryId}
       ORDER BY l.created_at DESC
     `;
@@ -57,10 +59,13 @@ export async function getListings(
         return sql<Listing[]>`
       SELECT
         l.*,
-        c.name AS category_name
+        c.name AS category_name,
+        u.name AS seller_name
       FROM listings l
       JOIN categories c ON c.id = l.category_id
-      WHERE l.title ILIKE ${"%" + search + "%"}
+      JOIN users u ON u.id = l.user_id
+      WHERE l.status = 'active'
+        AND l.title ILIKE ${"%" + search + "%"}
       ORDER BY l.created_at DESC
     `;
     }
@@ -69,10 +74,13 @@ export async function getListings(
         return sql<Listing[]>`
       SELECT
         l.*,
-        c.name AS category_name
+        c.name AS category_name,
+        u.name AS seller_name
       FROM listings l
       JOIN categories c ON c.id = l.category_id
-      WHERE l.category_id = ${categoryId}
+      JOIN users u ON u.id = l.user_id
+      WHERE l.status = 'active'
+        AND l.category_id = ${categoryId}
       ORDER BY l.created_at DESC
     `;
     }
@@ -80,9 +88,12 @@ export async function getListings(
     return sql<Listing[]>`
     SELECT
       l.*,
-      c.name AS category_name
+      c.name AS category_name,
+      u.name AS seller_name
     FROM listings l
     JOIN categories c ON c.id = l.category_id
+    JOIN users u ON u.id = l.user_id
+    WHERE l.status = 'active'
     ORDER BY l.created_at DESC
   `;
 }
