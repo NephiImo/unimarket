@@ -52,3 +52,21 @@ export async function createUser(
 
     return users[0];
 }
+
+export async function getUserById(
+    id: string,
+): Promise<User | null> {
+    const users = await sql<User[]>`
+        SELECT
+            id,
+            name,
+            email,
+            password_hash,
+            created_at
+        FROM users
+        WHERE id = ${id}
+        LIMIT 1
+    `;
+
+    return users[0] ?? null;
+}
