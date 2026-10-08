@@ -9,22 +9,10 @@ export async function GET(request: NextRequest) {
         const searchParams = request.nextUrl.searchParams;
 
         const search = searchParams.get("search")?.trim() || undefined;
-        const categoryParam = searchParams.get("category");
+        const categoryName =
+            searchParams.get("category")?.trim() || undefined;
 
-        let categoryId: number | undefined;
-
-        if (categoryParam) {
-            categoryId = Number(categoryParam);
-
-            if (!Number.isInteger(categoryId) || categoryId <= 0) {
-                return NextResponse.json(
-                    { error: "Category must be a positive integer." },
-                    { status: 400 },
-                );
-            }
-        }
-
-        const listings = await getListings(search, categoryId);
+        const listings = await getListings(search, categoryName);
 
         return NextResponse.json(listings, { status: 200 });
     } catch (error) {

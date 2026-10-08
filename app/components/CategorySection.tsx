@@ -63,7 +63,7 @@ export default function CategorySection() {
           {categories.map((category) => (
             <a
               key={category.name}
-              href={`/listings?category=${category.name.toLowerCase()}`}
+              href={`/listings?category=${encodeURIComponent(category.name)}`}
               className="group rounded-2xl border border-[#ebc8ba]/60 bg-[#fffdfc] p-6 transition-all hover:-translate-y-1 hover:border-[#c96f52]/40 hover:shadow-md"
             >
               <div className="flex items-start justify-between">
