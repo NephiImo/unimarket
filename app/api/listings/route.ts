@@ -8,7 +8,10 @@ export async function GET(request: NextRequest) {
     try {
         const searchParams = request.nextUrl.searchParams;
 
-        const search = searchParams.get("search")?.trim() || undefined;
+        const search =
+            searchParams.get("query")?.trim() ||
+            searchParams.get("search")?.trim() ||
+            undefined;
         const categoryName =
             searchParams.get("category")?.trim() || undefined;
 
