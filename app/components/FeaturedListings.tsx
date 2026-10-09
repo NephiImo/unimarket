@@ -1,4 +1,5 @@
 import ListingCard from "./ListingCard";
+import Link from "next/link";
 
 const featuredListings = [
   {
@@ -41,12 +42,12 @@ export default function FeaturedListings() {
             </p>
           </div>
 
-          <a
+          <Link
             href="/listings"
             className="text-sm font-semibold text-[#c96f52] hover:underline"
           >
             Browse all listings →
-          </a>
+          </Link>
         </div>
 
         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
