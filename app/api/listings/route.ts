@@ -1,3 +1,4 @@
+import { getCurrentUser } from "@/app/lib/auth/get-current-user";
 import { NextRequest, NextResponse } from "next/server";
 import {
     createListing,
@@ -30,9 +31,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        const userId = request.headers.get("x-user-id");
+        const user = await getCurrentUser();
 
-        if (!userId) {
+        if (!user) {
             return NextResponse.json(
                 { error: "Authentication required." },
                 { status: 401 },
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
         }
 
         const listing = await createListing({
-            userId,
+            userId: user.id,
             categoryId,
             title: title.trim(),
             description: description.trim(),
