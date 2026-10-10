@@ -1,4 +1,15 @@
-export default function DashboardPage() {
+
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/app/lib/auth/get-current-user";
+
+export default async function DashboardPage() {
+    const user = await getCurrentUser();
+
+    if (!user) {
+        redirect("/login");
+    }
+
     return (
         <main className="min-h-screen bg-gray-50 px-6 py-10">
             <div className="mx-auto max-w-4xl">
@@ -7,7 +18,7 @@ export default function DashboardPage() {
                         My Dashboard
                     </h1>
                     <p className="mt-2 text-gray-600">
-                        Manage your profile and view your listings.
+                        Welcome, {user.name}.
                     </p>
                 </div>
 
@@ -28,67 +39,47 @@ export default function DashboardPage() {
                             <input
                                 id="displayName"
                                 type="text"
-                                placeholder="Your display name"
+                                defaultValue={user.name}
                                 className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                             />
                         </div>
 
                         <div>
                             <label
-                                htmlFor="contactPreference"
+                                htmlFor="email"
                                 className="mb-1 block text-sm font-medium text-gray-700"
                             >
-                                Contact Preference
+                                Email
                             </label>
 
-                            <select
-                                id="contactPreference"
-                                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                                defaultValue=""
-                            >
-                                <option value="" disabled>
-                                    Select a contact preference
-                                </option>
-                                <option value="email">Email</option>
-                                <option value="phone">Phone</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <button
-                                type="button"
-                                disabled
-                                className="cursor-not-allowed rounded-md bg-gray-400 px-5 py-2 font-medium text-white"
-                            >
-                                Save Profile
-                            </button>
-
-                            <p className="mt-2 text-sm text-gray-500">
-                                Profile updates will be available after
-                                authentication is connected.
-                            </p>
+                            <input
+                                id="email"
+                                type="email"
+                                value={user.email}
+                                readOnly
+                                className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2"
+                            />
                         </div>
                     </div>
                 </section>
 
                 <section className="rounded-lg bg-white p-6 shadow-sm">
-                    <div className="mb-4 flex items-center justify-between">
+                    <div className="mb-4 flex items-center justify-between gap-4">
                         <div>
                             <h2 className="text-xl font-semibold text-gray-900">
                                 My Listings
                             </h2>
-
                             <p className="mt-1 text-sm text-gray-600">
                                 View and manage the items you have listed.
                             </p>
                         </div>
 
-                        <a
+                        <Link
                             href="/listings/new"
                             className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
                         >
                             Add Listing
-                        </a>
+                        </Link>
                     </div>
 
                     <div className="rounded-md border border-dashed border-gray-300 p-8 text-center">

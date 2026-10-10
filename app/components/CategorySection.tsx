@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const categories = [
   {
     name: "Books",
@@ -51,17 +53,17 @@ export default function CategorySection() {
             </p>
           </div>
 
-          <a
+          <Link
             href="/listings"
             className="text-sm font-semibold text-[#c96f52] hover:underline"
           >
             View all listings →
-          </a>
+          </Link>
         </div>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((category) => (
-            <a
+            <Link
               key={category.name}
               href={`/listings?category=${encodeURIComponent(category.name)}`}
               className="group rounded-2xl border border-[#ebc8ba]/60 bg-[#fffdfc] p-6 transition-all hover:-translate-y-1 hover:border-[#c96f52]/40 hover:shadow-md"
@@ -83,7 +85,7 @@ export default function CategorySection() {
               <p className="mt-2 text-sm leading-6 text-[#746963]">
                 {category.description}
               </p>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

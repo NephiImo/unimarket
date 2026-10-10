@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ListingCard from "./ListingCard";
 import { getListings, type Listing, } from "@/app/lib/listings/queries";
 
@@ -30,12 +31,12 @@ export default async function FeaturedListings() {
             </p>
           </div>
 
-          <a
+         <Link
             href="/listings"
             className="text-sm font-semibold text-[#C96F52] hover:underline"
           >
             Browse all listings →
-          </a>
+          </Link>
         </div>
 
         {featuredListings.length === 0 ? (
