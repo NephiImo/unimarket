@@ -34,19 +34,22 @@ session fixture, creates temporary users/listing/inquiry records inside one
 transaction, and always rolls the transaction back. It verifies that no fixture
 records remain. It covers session/owner spoofing, unauthorized mutations,
 editing persistence, image clearing, public visibility, deletion, and inquiry
-retention. These scripts load `.env.local` when present using Node's
-`process.loadEnvFile` (Node 20.12 or newer). Credentials must never be committed.
+retention. The database test also exercises the merged inquiry API and queries:
+buyer submission, seller-only received inquiries, unavailable-listing refusals,
+and inquiry history after deletion. These scripts load `.env.local` when present
+using Node's `process.loadEnvFile` (Node 20.12 or newer). Credentials must never be
+committed.
 
 If `POSTGRES_URL` is unavailable, schema inspection reports the blocker and the
 database integration test skips. The application build and live authentication
 require the existing `AUTH_SECRET` configuration.
 
-## Pending inquiry integration
+## Inquiry integration
 
-This branch is based on `feat/listings-integration` (PR #36). It leaves
-`app/listings/[id]/page.tsx` unchanged so PR #41 can add its inquiry form and login
-prompt. Owner edit/delete controls live in the shared listing detail component.
-Dashboard changes stay within the existing My Listings section, preserving the
-profile section and the place where PR #41 adds Received Inquiries. Received
-inquiry joins continue to work because soft deletion retains listing rows;
-PR #41's active-status guard prevents new inquiries on deleted listings.
+The feature incorporates `origin/main`, including merged PRs #36, #41, and #42,
+and targets `main`. It preserves the inquiry form and login prompt in
+`app/listings/[id]/page.tsx`. Owner edit/delete controls live in the shared listing
+detail component. Dashboard changes stay within My Listings, preserving the
+profile section and Received Inquiries navigation. Received inquiry joins
+continue to work because soft deletion retains listing rows, and the inquiry
+API's active-status guard prevents new inquiries on deleted listings.

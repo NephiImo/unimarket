@@ -10,7 +10,7 @@ import { loadModule } from "./helpers/load-typescript.mjs";
 const localEnvironment = fileURLToPath(new URL("../.env.local", import.meta.url));
 if (existsSync(localEnvironment)) process.loadEnvFile(localEnvironment);
 
-test("PostgreSQL listing lifecycle preserves inquiries and rolls back all fixtures", {
+test("PostgreSQL listing and inquiry lifecycle rolls back all fixtures", {
     skip: !process.env.POSTGRES_URL && "POSTGRES_URL is unavailable",
     timeout: 60000,
 }, async () => {
@@ -19,10 +19,10 @@ test("PostgreSQL listing lifecycle preserves inquiries and rolls back all fixtur
     });
     const ownerId = randomUUID();
     const otherId = randomUUID();
-    const inquiryId = randomUUID();
     const fixtureLabel = `listing-integration-${randomUUID()}`;
     const rollback = new Error("Rollback listing integration fixtures");
     let listingId;
+    let inquiryId;
     let fixtureCategoryId;
 
     try {
@@ -48,18 +48,24 @@ test("PostgreSQL listing lifecycle preserves inquiries and rolls back all fixtur
                     "@/app/lib/db": transaction,
                     "@/app/lib/listings/validation": validation,
                 });
+                const inquiryQueries = loadModule("app/lib/inquiries/queries.ts", {
+                    "@/app/lib/db": transaction,
+                });
                 let sessionUser = { id: ownerId };
                 const dependencies = {
                     "next/server": { NextRequest, NextResponse },
                     "@/app/lib/auth/get-current-user": { getCurrentUser: async () => sessionUser },
                     "@/app/lib/listings/queries": queries,
                     "@/app/lib/listings/validation": validation,
+                    "@/app/lib/inquiries/queries": inquiryQueries,
                 };
                 const collection = loadModule("app/api/listings/route.ts", dependencies);
                 const item = loadModule("app/api/listings/[id]/route.ts", dependencies);
-                const request = (method, body) => new NextRequest("http://localhost/api/listings", {
+                const sendInquiry = loadModule("app/api/listings/[id]/inquiries/route.ts", dependencies);
+                const receivedInquiries = loadModule("app/api/inquiries/received/route.ts", dependencies);
+                const request = (method, body, claimedUserId = otherId) => new NextRequest("http://localhost/api/listings", {
                     method,
-                    headers: { "Content-Type": "application/json", "x-user-id": otherId },
+                    headers: { "Content-Type": "application/json", "x-user-id": claimedUserId },
                     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
                 });
 
@@ -76,23 +82,46 @@ test("PostgreSQL listing lifecycle preserves inquiries and rolls back all fixtur
                 assert.equal((await queries.getListingsByUserId(ownerId)).length, 1);
                 const context = { params: Promise.resolve({ id: listingId }) };
 
-                await transaction`
-                    INSERT INTO inquiries (id, listing_id, sender_id, message)
-                    VALUES (${inquiryId}, ${listingId}, ${otherId}, 'Test inquiry that must be preserved.')
-                `;
+                assert.equal((await sendInquiry.POST(request("POST", {
+                    message: "Owner must not inquire about own listing.",
+                }), context)).status, 400);
 
                 sessionUser = { id: otherId };
+                const sent = await sendInquiry.POST(request("POST", {
+                    message: "  Test inquiry that must be preserved.  ",
+                    senderId: ownerId, userId: ownerId,
+                }, ownerId), context);
+                assert.equal(sent.status, 201);
+                const inquiry = await sent.json();
+                inquiryId = inquiry.id;
+                assert.equal(inquiry.sender_id, otherId, "inquiry sender must come from the session");
+                assert.equal(inquiry.listing_id, listingId);
+                assert.equal(inquiry.message, "Test inquiry that must be preserved.");
+                assert.equal((await inquiryQueries.getReceivedInquiries(otherId)).length, 0);
+                const buyerReceived = await receivedInquiries.GET(request("GET", undefined, ownerId));
+                assert.equal(buyerReceived.status, 200);
+                assert.deepEqual(await buyerReceived.json(), [], "buyer must not see another seller's inquiries");
                 assert.equal((await item.PATCH(request("PATCH", { title: "Unauthorized change" }), context)).status, 403);
                 assert.equal((await item.DELETE(request("DELETE"), context)).status, 403);
                 sessionUser = null;
                 assert.equal((await collection.POST(request("POST", {}))).status, 401);
                 assert.equal((await item.PATCH(request("PATCH", { price: 1 }), context)).status, 401);
                 assert.equal((await item.DELETE(request("DELETE"), context)).status, 401);
+                assert.equal((await sendInquiry.POST(request("POST", { message: "Anonymous message" }), context)).status, 401);
+                assert.equal((await receivedInquiries.GET()).status, 401);
                 const unchanged = await queries.getListingById(listingId);
                 assert.equal(unchanged.title, fixtureLabel);
                 assert.equal(Number(unchanged.price), 123.45);
 
                 sessionUser = { id: ownerId };
+                const received = await inquiryQueries.getReceivedInquiries(ownerId);
+                assert.equal(received.length, 1);
+                assert.equal(received[0].id, inquiryId);
+                assert.equal(received[0].listing_title, fixtureLabel);
+                assert.equal(received[0].sender_name, "Listing test buyer");
+                const ownerReceived = await receivedInquiries.GET();
+                assert.equal(ownerReceived.status, 200);
+                assert.equal((await ownerReceived.json())[0].id, inquiryId);
                 const saved = await item.PATCH(request("PATCH", {
                     price: 99.95, status: "sold", imageUrl: null,
                 }), context);
@@ -101,6 +130,12 @@ test("PostgreSQL listing lifecycle preserves inquiries and rolls back all fixtur
                 assert.equal(Number(persisted.price), 99.95);
                 assert.equal(persisted.status, "sold");
                 assert.equal(persisted.image_url, null);
+
+                sessionUser = { id: otherId };
+                assert.equal((await sendInquiry.POST(request("POST", {
+                    message: "Sold listings must reject new inquiries.",
+                }), context)).status, 400);
+                sessionUser = { id: ownerId };
 
                 assert.equal((await item.PATCH(request("PATCH", { status: "active" }), context)).status, 200);
                 assert.equal((await queries.getListings(fixtureLabel)).length, 1);
@@ -115,6 +150,19 @@ test("PostgreSQL listing lifecycle preserves inquiries and rolls back all fixtur
                 `;
                 assert.equal(inquiries.length, 1);
                 assert.equal(inquiries[0].title, fixtureLabel);
+                const retained = await inquiryQueries.getReceivedInquiries(ownerId);
+                assert.equal(retained.length, 1);
+                assert.equal(retained[0].id, inquiryId);
+                assert.equal(retained[0].listing_title, fixtureLabel);
+                const retainedResponse = await receivedInquiries.GET();
+                assert.equal(retainedResponse.status, 200);
+                assert.equal((await retainedResponse.json())[0].id, inquiryId);
+                sessionUser = { id: otherId };
+                assert.equal((await sendInquiry.POST(request("POST", {
+                    message: "Deleted listings must reject new inquiries.",
+                }), context)).status, 400);
+                assert.equal((await inquiryQueries.getReceivedInquiries(otherId)).length, 0);
+                sessionUser = { id: ownerId };
                 assert.equal(await queries.getListingById(listingId), null);
                 assert.equal((await queries.getListingsByUserId(ownerId)).length, 0);
                 assert.equal((await queries.getListings(fixtureLabel)).length, 0);
@@ -137,6 +185,10 @@ test("PostgreSQL listing lifecycle preserves inquiries and rolls back all fixtur
         assert.equal(listings.length, 0, "fixture listing must be rolled back");
         const inquiries = await sql`SELECT id FROM inquiries WHERE id = ${inquiryId}`;
         assert.equal(inquiries.length, 0, "fixture inquiry must be rolled back");
+        const fixtureInquiries = await sql`
+            SELECT id FROM inquiries WHERE listing_id = ${listingId} OR sender_id IN (${ownerId}, ${otherId})
+        `;
+        assert.equal(fixtureInquiries.length, 0, "all API-generated fixture inquiries must be rolled back");
         if (fixtureCategoryId !== undefined) {
             const categories = await sql`SELECT id FROM categories WHERE id = ${fixtureCategoryId}`;
             assert.equal(categories.length, 0, "fixture category must be rolled back");

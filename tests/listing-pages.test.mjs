@@ -5,7 +5,11 @@ import * as jsxRuntime from 'react/jsx-runtime';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { loadModule } from './helpers/load-typescript.mjs';
 
-const owner = { id: '11111111-1111-4111-8111-111111111111' };
+const owner = {
+  id: '11111111-1111-4111-8111-111111111111',
+  name: 'Listing owner',
+  email: 'owner@example.invalid',
+};
 const listing = {
   id: '22222222-2222-4222-8222-222222222222',
   user_id: owner.id,
@@ -21,7 +25,12 @@ const listing = {
 
 function loadPage(
   relativePath,
-  { user = owner, existingListing = listing } = {}
+  {
+    user = owner,
+    existingListing = listing,
+    ownedListings = [listing],
+    listingError = null,
+  } = {}
 ) {
   const calls = { categories: 0, listing: 0 };
   const categories = [{ id: 42, name: 'Furniture' }];
@@ -51,6 +60,11 @@ function loadPage(
         calls.listing++;
         return existingListing;
       },
+      getListingsByUserId: async (userId) => {
+        calls.ownerId = userId;
+        if (listingError) throw listingError;
+        return ownedListings;
+      },
     },
     '@/components/ListingForm': {
       default: (props) => {
@@ -61,6 +75,14 @@ function loadPage(
     },
     '@/components/DeleteListingButton': {
       default: () => createElement('button', {}, 'Delete'),
+      __esModule: true,
+    },
+    '@/components/ListingDetail': {
+      default: () => createElement('article', {}, 'Listing details'),
+      __esModule: true,
+    },
+    '@/components/InquiryForm': {
+      default: () => createElement('form', { 'data-testid': 'inquiry-form' }),
       __esModule: true,
     },
   };
@@ -141,6 +163,79 @@ test('listing details show edit/delete controls only to the owner', async () => 
     assert.equal(
       html.includes('<button>Delete</button>'),
       user?.id === owner.id
+    );
+  }
+});
+
+test('dashboard requires authentication before loading owned listings', async () => {
+  const { page, calls } = loadPage('app/dashboard/page.tsx', { user: null });
+  await assert.rejects(
+    page({ searchParams: Promise.resolve({}) }),
+    /redirect:\/login/
+  );
+  assert.equal(calls.ownerId, undefined);
+});
+
+test('dashboard preserves profile and inquiry navigation alongside owner actions', async () => {
+  const { page, calls } = loadPage('app/dashboard/page.tsx');
+  const html = renderToStaticMarkup(
+    await page({ searchParams: Promise.resolve({ deleted: '1' }) })
+  );
+  assert.equal(calls.ownerId, owner.id);
+  assert.match(html, /Profile Information/);
+  assert.ok(html.includes(owner.email));
+  assert.ok(html.includes(`href="/listings/${listing.id}/edit"`));
+  assert.ok(html.includes('href="/inquiries/received"'));
+  assert.match(html, /Received Inquiries/);
+  assert.match(html, /deleted successfully/);
+});
+
+test('empty and failed listing loads preserve the received-inquiries navigation', async () => {
+  for (const options of [
+    { ownedListings: [] },
+    { listingError: new Error('INTERNAL_DATABASE_DETAILS') },
+  ]) {
+    const { page } = loadPage('app/dashboard/page.tsx', options);
+    const html = renderToStaticMarkup(
+      await page({ searchParams: Promise.resolve({}) })
+    );
+    assert.ok(html.includes('href="/inquiries/received"'));
+    assert.ok(!html.includes('INTERNAL_DATABASE_DETAILS'));
+    assert.match(
+      html,
+      options.listingError ? /load your listings/ : /do not have any listings/
+    );
+  }
+});
+
+test('merged listing details preserve active buyer inquiries and guest login prompts', async () => {
+  for (const { user, status, canInquire, loginPrompt } of [
+    {
+      user: { id: 'buyer' },
+      status: 'active',
+      canInquire: true,
+      loginPrompt: false,
+    },
+    { user: owner, status: 'active', canInquire: false, loginPrompt: false },
+    { user: null, status: 'active', canInquire: false, loginPrompt: true },
+    {
+      user: { id: 'buyer' },
+      status: 'sold',
+      canInquire: false,
+      loginPrompt: false,
+    },
+  ]) {
+    const { page } = loadPage('app/listings/[id]/page.tsx', {
+      user,
+      existingListing: { ...listing, status },
+    });
+    const html = renderToStaticMarkup(
+      await page({ params: Promise.resolve({ id: listing.id }) })
+    );
+    assert.equal(html.includes('data-testid="inquiry-form"'), canInquire);
+    assert.equal(
+      html.includes('Please log in to contact the seller.'),
+      loginPrompt
     );
   }
 });
