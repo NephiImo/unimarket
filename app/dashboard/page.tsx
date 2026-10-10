@@ -152,6 +152,23 @@ export default async function DashboardPage({
                         </ul>
                     )}
                 </section>
+
+                <section className="mt-6 rounded-lg bg-white p-6 shadow-sm">
+                    <h2 className="text-xl font-semibold text-gray-900">
+                        Received Inquiries
+                    </h2>
+
+                    <p className="mt-2 text-gray-600">
+                        View messages from students interested in your listings.
+                    </p>
+
+                    <Link
+                        href="/inquiries/received"
+                        className="mt-4 inline-block rounded-md bg-[#C96F52] px-5 py-2 font-medium text-white hover:opacity-90"
+                    >
+                        View Inquiries
+                    </Link>
+                </section>
             </div>
         </main>
     );
