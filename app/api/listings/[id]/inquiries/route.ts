@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCurrentUser } from "@/app/lib/auth/get-current-user";
 import {
     createInquiry,
     getInquiryListing,
@@ -15,9 +16,9 @@ export async function POST(
     context: RouteContext,
 ) {
     try {
-        const senderId = request.headers.get("x-user-id");
+        const user = await getCurrentUser();
 
-        if (!senderId) {
+        if (!user) {
             return NextResponse.json(
                 { error: "Authentication required." },
                 { status: 401 },
@@ -62,7 +63,7 @@ export async function POST(
             );
         }
 
-        if (listing.user_id === senderId) {
+        if (listing.user_id === user.id) {
             return NextResponse.json(
                 { error: "You cannot send an inquiry about your own listing." },
                 { status: 400 },
@@ -71,7 +72,7 @@ export async function POST(
 
         const inquiry = await createInquiry(
             id,
-            senderId,
+            user.id,
             trimmedMessage,
         );
 
