@@ -73,6 +73,28 @@ Stores messages sent by users about marketplace listings.
 | `message`    | TEXT      | Required                             |
 | `created_at` | TIMESTAMP | Required, defaults to current time   |
 
+## Listing Availability and Deletion
+
+The live schema was inspected through `information_schema` and `pg_constraint`.
+`listings.status` is `VARCHAR(20)` with default `active`; it has no enum or check
+constraint. The application accepts `active` (available) and `sold` for creation
+and editing. The API reserves `deleted` for owner-authorized soft deletion.
+
+Deleting a listing updates its status to `deleted` and retains its row. The
+`inquiries.listing_id` foreign key uses `NO ACTION`, so hard deletion would fail
+when inquiries reference the listing. Retaining the row also preserves listing
+titles in received inquiries from PR #41.
+
+Public browsing selects only `active` listings. Details, editing, and owner
+dashboard queries exclude `deleted` listings, and updates cannot restore a
+deleted listing. Deletion requires both the listing ID and authenticated owner
+ID in the SQL update. No schema migration is required.
+
+Listing input validation respects the verified `VARCHAR(150)` title/location,
+`INTEGER` category foreign key, and `NUMERIC(10,2)` price columns. The application
+also limits descriptions to 5,000 characters and optional HTTP(S) image URLs to
+2,048 characters.
+
 ## Relationships
 
 ```text

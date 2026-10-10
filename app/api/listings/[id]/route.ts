@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/auth/get-current-user";
 import {
+    categoryExists,
     deleteListing,
     getListingById,
     updateListing,
 } from "@/app/lib/listings/queries";
+import { validateListingInput } from "@/app/lib/listings/validation";
 
 type RouteContext = {
     params: Promise<{ id: string }>;
@@ -16,7 +18,6 @@ export async function GET(
 ) {
     try {
         const { id } = await context.params;
-
         const listing = await getListingById(id);
 
         if (!listing) {
@@ -29,7 +30,6 @@ export async function GET(
         return NextResponse.json(listing, { status: 200 });
     } catch (error) {
         console.error("Failed to fetch listing:", error);
-
         return NextResponse.json(
             { error: "Failed to fetch listing." },
             { status: 500 },
@@ -43,7 +43,6 @@ export async function PATCH(
 ) {
     try {
         const user = await getCurrentUser();
-
         if (!user) {
             return NextResponse.json(
                 { error: "Authentication required." },
@@ -52,119 +51,59 @@ export async function PATCH(
         }
 
         const { id } = await context.params;
-        const body = await request.json();
-
-        const {
-            categoryId,
-            title,
-            description,
-            price,
-            imageUrl,
-            location,
-            status,
-        } = body;
-
-        if (
-            categoryId !== undefined &&
-            (!Number.isInteger(categoryId) || categoryId <= 0)
-        ) {
+        const existingListing = await getListingById(id);
+        if (!existingListing) {
             return NextResponse.json(
-                { error: "Invalid category ID." },
-                { status: 400 },
+                { error: "Listing not found." },
+                { status: 404 },
             );
         }
-
-        if (
-            title !== undefined &&
-            (typeof title !== "string" || !title.trim())
-        ) {
-            return NextResponse.json(
-                { error: "Invalid title." },
-                { status: 400 },
-            );
-        }
-
-        if (
-            description !== undefined &&
-            (typeof description !== "string" || !description.trim())
-        ) {
-            return NextResponse.json(
-                { error: "Invalid description." },
-                { status: 400 },
-            );
-        }
-
-        if (
-            price !== undefined &&
-            (typeof price !== "number" || price < 0)
-        ) {
-            return NextResponse.json(
-                { error: "Invalid price." },
-                { status: 400 },
-            );
-        }
-
-        if (
-            location !== undefined &&
-            (typeof location !== "string" || !location.trim())
-        ) {
-            return NextResponse.json(
-                { error: "Invalid location." },
-                { status: 400 },
-            );
-        }
-
-        if (
-            imageUrl !== undefined &&
-            imageUrl !== null &&
-            typeof imageUrl !== "string"
-        ) {
-            return NextResponse.json(
-                { error: "Invalid image URL." },
-                { status: 400 },
-            );
-        }
-
-        if (
-            status !== undefined &&
-            (typeof status !== "string" || !status.trim())
-        ) {
-            return NextResponse.json(
-                { error: "Invalid status." },
-                { status: 400 },
-            );
-        }
-
-        const listing = await updateListing(id, user.id, {
-            categoryId,
-            title: title?.trim(),
-            description: description?.trim(),
-            price,
-            imageUrl,
-            location: location?.trim(),
-            status: status?.trim(),
-        });
-
-        if (!listing) {
-            const existingListing = await getListingById(id);
-
-            if (!existingListing) {
-                return NextResponse.json(
-                    { error: "Listing not found." },
-                    { status: 404 },
-                );
-            }
-
+        if (existingListing.user_id !== user.id) {
             return NextResponse.json(
                 { error: "You do not have permission to update this listing." },
                 { status: 403 },
             );
         }
 
+        let body: unknown;
+        try {
+            body = await request.json();
+        } catch {
+            return NextResponse.json(
+                { error: "Send listing details as valid JSON." },
+                { status: 400 },
+            );
+        }
+
+        const { data, errors } = validateListingInput(body, true);
+        if (!data) {
+            return NextResponse.json(
+                { error: "Check the listing details and try again.", errors },
+                { status: 400 },
+            );
+        }
+
+        if (data.categoryId !== undefined && !(await categoryExists(data.categoryId))) {
+            return NextResponse.json(
+                {
+                    error: "Select an available category.",
+                    errors: { categoryId: "This category is no longer available." },
+                },
+                { status: 400 },
+            );
+        }
+
+        // Ownership and the deletion guard are checked again in the UPDATE itself.
+        const listing = await updateListing(id, user.id, data);
+        if (!listing) {
+            return NextResponse.json(
+                { error: "Listing not found." },
+                { status: 404 },
+            );
+        }
         return NextResponse.json(listing, { status: 200 });
     } catch (error) {
         console.error("Failed to update listing:", error);
-
         return NextResponse.json(
             { error: "Failed to update listing." },
             { status: 500 },
@@ -178,7 +117,6 @@ export async function DELETE(
 ) {
     try {
         const user = await getCurrentUser();
-
         if (!user) {
             return NextResponse.json(
                 { error: "Authentication required." },
@@ -187,29 +125,31 @@ export async function DELETE(
         }
 
         const { id } = await context.params;
-
-        const deleted = await deleteListing(id, user.id);
-
-        if (!deleted) {
-            const existingListing = await getListingById(id);
-
-            if (!existingListing) {
-                return NextResponse.json(
-                    { error: "Listing not found." },
-                    { status: 404 },
-                );
-            }
-
+        const existingListing = await getListingById(id);
+        if (!existingListing) {
+            return NextResponse.json(
+                { error: "Listing not found." },
+                { status: 404 },
+            );
+        }
+        if (existingListing.user_id !== user.id) {
             return NextResponse.json(
                 { error: "You do not have permission to delete this listing." },
                 { status: 403 },
             );
         }
 
+        // Keep the row so existing inquiries retain their listing reference.
+        const deleted = await deleteListing(id, user.id);
+        if (!deleted) {
+            return NextResponse.json(
+                { error: "Listing not found." },
+                { status: 404 },
+            );
+        }
         return new NextResponse(null, { status: 204 });
     } catch (error) {
         console.error("Failed to delete listing:", error);
-
         return NextResponse.json(
             { error: "Failed to delete listing." },
             { status: 500 },
