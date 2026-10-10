@@ -1,3 +1,4 @@
+import { getCurrentUser } from "@/app/lib/auth/get-current-user";
 import { NextRequest, NextResponse } from "next/server";
 import {
     createListing,
@@ -8,23 +9,14 @@ export async function GET(request: NextRequest) {
     try {
         const searchParams = request.nextUrl.searchParams;
 
-        const search = searchParams.get("search")?.trim() || undefined;
-        const categoryParam = searchParams.get("category");
+        const search =
+            searchParams.get("query")?.trim() ||
+            searchParams.get("search")?.trim() ||
+            undefined;
+        const categoryName =
+            searchParams.get("category")?.trim() || undefined;
 
-        let categoryId: number | undefined;
-
-        if (categoryParam) {
-            categoryId = Number(categoryParam);
-
-            if (!Number.isInteger(categoryId) || categoryId <= 0) {
-                return NextResponse.json(
-                    { error: "Category must be a positive integer." },
-                    { status: 400 },
-                );
-            }
-        }
-
-        const listings = await getListings(search, categoryId);
+        const listings = await getListings(search, categoryName);
 
         return NextResponse.json(listings, { status: 200 });
     } catch (error) {
@@ -39,9 +31,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     try {
-        const userId = request.headers.get("x-user-id");
+        const user = await getCurrentUser();
 
-        if (!userId) {
+        if (!user) {
             return NextResponse.json(
                 { error: "Authentication required." },
                 { status: 401 },
@@ -78,7 +70,7 @@ export async function POST(request: NextRequest) {
         }
 
         const listing = await createListing({
-            userId,
+            userId: user.id,
             categoryId,
             title: title.trim(),
             description: description.trim(),

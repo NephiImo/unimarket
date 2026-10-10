@@ -14,14 +14,9 @@ export default async function ListingsPage({
   const params = await searchParams;
 
   const query = params.query?.trim() || undefined;
-  const categoryId = params.category
-    ? Number(params.category)
-    : undefined;
+  const categoryName = params.category?.trim() || undefined;
 
-  const listings = await getListings(
-    query,
-    Number.isInteger(categoryId) ? categoryId : undefined,
-  );
+  const listings = await getListings(query, categoryName);
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -72,13 +67,13 @@ export default async function ListingsPage({
             className="w-full rounded-lg border border-[#D8C9C1] bg-white px-3 py-2 text-[#352B28] outline-none focus:border-[#C96F52]"
           >
             <option value="">All categories</option>
-            <option value="1">Electronics</option>
-            <option value="2">Fashion</option>
-            <option value="3">Books</option>
-            <option value="4">Furniture</option>
-            <option value="5">Vehicles</option>
-            <option value="6">Food</option>
-            <option value="7">Other</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Fashion">Fashion</option>
+            <option value="Books">Books</option>
+            <option value="Furniture">Furniture</option>
+            <option value="Vehicles">Vehicles</option>
+            <option value="Food">Food</option>
+            <option value="Other">Other</option>
           </select>
         </div>
 

@@ -37,9 +37,9 @@ export type UpdateListingInput = {
 
 export async function getListings(
     search?: string,
-    categoryId?: number,
+    categoryName?: string,
 ): Promise<Listing[]> {
-    if (search && categoryId) {
+    if (search && categoryName) {
         return sql<Listing[]>`
       SELECT
         l.*,
@@ -50,7 +50,7 @@ export async function getListings(
       JOIN users u ON u.id = l.user_id
       WHERE l.status = 'active'
         AND l.title ILIKE ${"%" + search + "%"}
-        AND l.category_id = ${categoryId}
+        AND c.name ILIKE ${categoryName}
       ORDER BY l.created_at DESC
     `;
     }
@@ -70,7 +70,7 @@ export async function getListings(
     `;
     }
 
-    if (categoryId) {
+    if (categoryName) {
         return sql<Listing[]>`
       SELECT
         l.*,
@@ -80,7 +80,7 @@ export async function getListings(
       JOIN categories c ON c.id = l.category_id
       JOIN users u ON u.id = l.user_id
       WHERE l.status = 'active'
-        AND l.category_id = ${categoryId}
+        AND c.name ILIKE ${categoryName}
       ORDER BY l.created_at DESC
     `;
     }

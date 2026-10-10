@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCurrentUser } from "@/app/lib/auth/get-current-user";
 import {
     deleteListing,
     getListingById,
@@ -41,9 +42,9 @@ export async function PATCH(
     context: RouteContext,
 ) {
     try {
-        const userId = request.headers.get("x-user-id");
+        const user = await getCurrentUser();
 
-        if (!userId) {
+        if (!user) {
             return NextResponse.json(
                 { error: "Authentication required." },
                 { status: 401 },
@@ -134,7 +135,7 @@ export async function PATCH(
             );
         }
 
-        const listing = await updateListing(id, userId, {
+        const listing = await updateListing(id, user.id, {
             categoryId,
             title: title?.trim(),
             description: description?.trim(),
@@ -172,13 +173,13 @@ export async function PATCH(
 }
 
 export async function DELETE(
-    request: NextRequest,
+    _request: NextRequest,
     context: RouteContext,
 ) {
     try {
-        const userId = request.headers.get("x-user-id");
+        const user = await getCurrentUser();
 
-        if (!userId) {
+        if (!user) {
             return NextResponse.json(
                 { error: "Authentication required." },
                 { status: 401 },
@@ -187,7 +188,7 @@ export async function DELETE(
 
         const { id } = await context.params;
 
-        const deleted = await deleteListing(id, userId);
+        const deleted = await deleteListing(id, user.id);
 
         if (!deleted) {
             const existingListing = await getListingById(id);
