@@ -1,9 +1,11 @@
 import { getCurrentUser } from "@/app/lib/auth/get-current-user";
 import { NextRequest, NextResponse } from "next/server";
 import {
+    categoryExists,
     createListing,
     getListings,
 } from "@/app/lib/listings/queries";
+import { validateListingInput } from "@/app/lib/listings/validation";
 
 export async function GET(request: NextRequest) {
     try {
@@ -40,43 +42,37 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const body = await request.json();
-
-        const {
-            categoryId,
-            title,
-            description,
-            price,
-            imageUrl,
-            location,
-        } = body;
-
-        if (
-            !Number.isInteger(categoryId) ||
-            categoryId <= 0 ||
-            typeof title !== "string" ||
-            !title.trim() ||
-            typeof description !== "string" ||
-            !description.trim() ||
-            typeof price !== "number" ||
-            price < 0 ||
-            typeof location !== "string" ||
-            !location.trim()
-        ) {
+        let body: unknown;
+        try {
+            body = await request.json();
+        } catch {
             return NextResponse.json(
-                { error: "Invalid listing data." },
+                { error: "Send listing details as valid JSON." },
+                { status: 400 },
+            );
+        }
+
+        const { data, errors } = validateListingInput(body);
+        if (!data) {
+            return NextResponse.json(
+                { error: "Check the listing details and try again.", errors },
+                { status: 400 },
+            );
+        }
+
+        if (!(await categoryExists(data.categoryId))) {
+            return NextResponse.json(
+                {
+                    error: "Select an available category.",
+                    errors: { categoryId: "This category is no longer available." },
+                },
                 { status: 400 },
             );
         }
 
         const listing = await createListing({
+            ...data,
             userId: user.id,
-            categoryId,
-            title: title.trim(),
-            description: description.trim(),
-            price,
-            imageUrl: imageUrl ?? null,
-            location: location.trim(),
         });
 
         return NextResponse.json(listing, { status: 201 });

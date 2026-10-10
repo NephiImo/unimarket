@@ -1,4 +1,14 @@
 import sql from "@/app/lib/db";
+import {
+    isListingId,
+    type ListingInput,
+    type ListingStatus,
+} from "@/app/lib/listings/validation";
+
+export type Category = {
+    id: number;
+    name: string;
+};
 
 export type Listing = {
     id: string;
@@ -9,31 +19,38 @@ export type Listing = {
     price: number;
     image_url: string | null;
     location: string;
-    status: string;
+    status: ListingStatus;
     created_at: Date;
     category_name?: string;
     seller_name?: string;
 };
 
-export type CreateListingInput = {
+export type CreateListingInput = ListingInput & {
     userId: string;
-    categoryId: number;
-    title: string;
-    description: string;
-    price: number;
-    imageUrl?: string | null;
-    location: string;
 };
 
-export type UpdateListingInput = {
-    categoryId?: number;
-    title?: string;
-    description?: string;
-    price?: number;
-    imageUrl?: string | null;
-    location?: string;
-    status?: string;
-};
+export type UpdateListingInput = Partial<ListingInput>;
+
+export async function getCategories(): Promise<Category[]> {
+    return sql<Category[]>`SELECT id, name FROM categories ORDER BY name`;
+}
+
+export async function categoryExists(id: number): Promise<boolean> {
+    const categories = await sql<{ id: number }[]>`
+        SELECT id FROM categories WHERE id = ${id} LIMIT 1
+    `;
+    return categories.length > 0;
+}
+
+export async function getListingsByUserId(userId: string): Promise<Listing[]> {
+    return sql<Listing[]>`
+        SELECT l.*, c.name AS category_name
+        FROM listings l
+        JOIN categories c ON c.id = l.category_id
+        WHERE l.user_id = ${userId} AND l.status <> 'deleted'
+        ORDER BY l.created_at DESC
+    `;
+}
 
 export async function getListings(
     search?: string,
@@ -101,6 +118,8 @@ export async function getListings(
 export async function getListingById(
     id: string,
 ): Promise<Listing | null> {
+    if (!isListingId(id)) return null;
+
     const listings = await sql<Listing[]>`
     SELECT
       l.*,
@@ -109,7 +128,7 @@ export async function getListingById(
     FROM listings l
     JOIN categories c ON c.id = l.category_id
     JOIN users u ON u.id = l.user_id
-    WHERE l.id = ${id}
+    WHERE l.id = ${id} AND l.status <> 'deleted'
     LIMIT 1
   `;
 
@@ -127,7 +146,8 @@ export async function createListing(
       description,
       price,
       image_url,
-      location
+      location,
+      status
     )
     VALUES (
       ${input.userId},
@@ -136,7 +156,8 @@ export async function createListing(
       ${input.description},
       ${input.price},
       ${input.imageUrl ?? null},
-      ${input.location}
+      ${input.location},
+      ${input.status}
     )
     RETURNING *
   `;
@@ -149,6 +170,8 @@ export async function updateListing(
     userId: string,
     input: UpdateListingInput,
 ): Promise<Listing | null> {
+    if (!isListingId(id)) return null;
+
     const listings = await sql<Listing[]>`
     UPDATE listings
     SET
@@ -156,11 +179,16 @@ export async function updateListing(
       title = COALESCE(${input.title ?? null}, title),
       description = COALESCE(${input.description ?? null}, description),
       price = COALESCE(${input.price ?? null}, price),
-      image_url = COALESCE(${input.imageUrl ?? null}, image_url),
+      image_url = CASE
+        WHEN ${Object.prototype.hasOwnProperty.call(input, "imageUrl")}
+        THEN ${input.imageUrl ?? null}
+        ELSE image_url
+      END,
       location = COALESCE(${input.location ?? null}, location),
       status = COALESCE(${input.status ?? null}, status)
     WHERE id = ${id}
       AND user_id = ${userId}
+      AND status <> 'deleted'
     RETURNING *
   `;
 
@@ -171,10 +199,14 @@ export async function deleteListing(
     id: string,
     userId: string,
 ): Promise<boolean> {
+    if (!isListingId(id)) return false;
+
     const result = await sql`
-    DELETE FROM listings
+    UPDATE listings
+    SET status = 'deleted'
     WHERE id = ${id}
       AND user_id = ${userId}
+      AND status <> 'deleted'
   `;
 
     return result.count > 0;
