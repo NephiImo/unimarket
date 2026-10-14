@@ -1,6 +1,6 @@
 # UniMarket
 
-UniMarket is a student marketplace that helps university students buy and sell items within their school community. Students can browse listings, post items for sale, manage their listings, and communicate with interested buyers through inquiries and messaging.
+UniMarket is a student marketplace that helps university students buy and sell items within their school community. Students can browse listings, post items for sale, manage their listings, and send inquiries to sellers.
 
 ## Team Members
 
@@ -14,7 +14,7 @@ UniMarket is a student marketplace that helps university students buy and sell i
 
 Buying and selling within a student community can be inconvenient when listings and conversations are scattered across different platforms. UniMarket brings item discovery, listing management, and buyer-seller communication together in one application.
 
-The application provides user accounts, searchable listings, listing management, profiles, and inquiry conversations. It is designed to make it easier for students to find items, advertise products, and communicate with potential buyers.
+The application provides user accounts, searchable listings, listing management, profile information, and listing inquiries. It is designed to make it easier for students to find items, advertise products, and contact potential sellers.
 
 ## Technology Stack
 
@@ -27,6 +27,8 @@ The application provides user accounts, searchable listings, listing management,
 - **Version control:** Git and GitHub
 
 ## Core Features
+
+The features below are currently merged into `main`.
 
 ### User Authentication
 
@@ -49,19 +51,24 @@ The application provides user accounts, searchable listings, listing management,
 
 - View profile information
 - Access the user dashboard
-- Manage personal listings and relevant account information
+- Manage personal listings
 
 ### Buyer and Seller Inquiries
 
 - Send an inquiry about a listing
 - View inquiries received by sellers
-- Submit a seller response
-- Continue conversations through inquiry messaging
-- Restrict inquiry and messaging access to authorized participants
+- Restrict received inquiries to the authenticated listing owner
+
+## Features Under Review
+
+These features are proposed in open pull requests and are not yet merged into `main`:
+
+- [PR #45 — Profile updates](https://github.com/NephiImo/unimarket/pull/45): save display names and contact preferences through a dashboard profile form and `GET`/`PATCH /api/profile`. Its migration adds `users.contact_preference`; selecting a preference does not implement email notifications or message delivery.
+- [PR #47 — Two-way inquiry chat](https://github.com/NephiImo/unimarket/pull/47): buyer sent-inquiries pages (`/inquiries/sent`), seller responses, and ongoing buyer/seller conversations. This includes conversation APIs and an `inquiry_messages` migration.
 
 ## Application Routes
 
-The application uses the Next.js App Router. The following routes describe the main user-facing pages; verify the current implementation before treating this list as exhaustive.
+The application uses the Next.js App Router. These are the user-facing pages currently merged into `main`.
 
 | Route | Purpose |
 |---|---|
@@ -71,14 +78,13 @@ The application uses the Next.js App Router. The following routes describe the m
 | `/listings/new` | Create a listing |
 | `/listings/[id]/edit` | Edit a listing |
 | `/dashboard` | User dashboard and profile |
-| `/inquiries/sent` | View inquiries sent by the user |
 | `/inquiries/received` | View inquiries received by the user |
 | `/login` | Sign in |
 | `/register` | Create an account |
 
 ## API Documentation
 
-The API routes use the Next.js App Router to handle authentication, listing operations, inquiries, and messaging.
+The merged API routes use the Next.js App Router to handle authentication, listing operations, and inquiries.
 
 ### Authentication
 
@@ -98,21 +104,30 @@ The API routes use the Next.js App Router to handle authentication, listing oper
 | PATCH | `/api/listings/[id]` | Update a listing |
 | DELETE | `/api/listings/[id]` | Delete a listing |
 
-### Inquiries and Messaging
+### Inquiries
 
 | Method | Endpoint | Description |
 |---|---|---|
 | POST | `/api/listings/[id]/inquiries` | Send an inquiry about a listing |
 | GET | `/api/inquiries/received` | Retrieve inquiries received by the current user |
-| GET | `/api/inquiries/[id]/messages` | Retrieve messages in an inquiry conversation |
-| POST | `/api/inquiries/[id]/messages` | Send a message in an inquiry conversation |
-| POST | `/api/inquiries/[id]/response` | Submit a seller response |
 
-Protected operations require appropriate authentication and authorization. Requests are validated on the server, and access to listings and inquiry conversations is restricted according to the user's permissions.
+Protected operations require session authentication and server-side authorization. Listing updates and deletion are owner-only; received inquiries are visible only to the listing owner.
+
+### APIs Under Review
+
+These endpoints are introduced by open PRs and are not available in merged `main` yet:
+
+| PR | Method | Endpoint | Proposed behavior |
+|---|---|---|---|
+| #45 | GET | `/api/profile` | Retrieve the authenticated user's profile information |
+| #45 | PATCH | `/api/profile` | Update the authenticated user's display name and contact preference |
+| #47 | GET | `/api/inquiries/[id]/messages` | Retrieve messages in an inquiry conversation |
+| #47 | POST | `/api/inquiries/[id]/messages` | Send a message in an inquiry conversation |
+| #47 | POST | `/api/inquiries/[id]/response` | Submit a seller response |
 
 ## Database and Data Model
 
-UniMarket uses PostgreSQL to store application data.
+UniMarket uses PostgreSQL to store application data. The merged schema has four core tables: `users`, `listings`, `categories`, and `inquiries`.
 
 ### Users
 
@@ -136,11 +151,11 @@ Represents a buyer's inquiry about a listing.
 
 Each inquiry is associated with a listing and the user who sent it. Inquiries support communication between buyers and sellers.
 
-### Inquiry Messages
+### Inquiry Messages (Under Review)
 
-The inquiry messaging feature uses an `inquiry_messages` table to store conversation messages, including the associated inquiry, sender, message content, and creation time.
+PR #47 proposes an `inquiry_messages` table to store conversation messages, including the associated inquiry, sender, message content, and creation time. This table and its migration belong to the feature still under review.
 
-Confirm that the database migration has been applied successfully in the target environment before relying on this table.
+After the feature is approved, confirm that its migration has been applied in the intended environment before relying on this table.
 
 ## Design and User Experience
 
@@ -169,7 +184,7 @@ UniMarket uses a warm, consistent visual style intended to make browsing and man
 
 Install the following before running the application locally:
 
-- Node.js
+- Node.js 20.12 or newer (the database tooling uses `process.loadEnvFile`)
 - npm
 - Git
 - Access to a PostgreSQL database
@@ -179,7 +194,7 @@ Install the following before running the application locally:
 Clone the team repository:
 
 ```bash
-git clone <TEAM_REPOSITORY_URL>
+git clone https://github.com/NephiImo/unimarket.git
 ```
 
 Move into the project directory:
@@ -196,13 +211,17 @@ npm install
 
 ### Environment Configuration
 
-Create a `.env.local` file in the project root and configure the PostgreSQL connection:
+Create a `.env.local` file in the project root and configure both required server-side environment variables:
 
 ```env
 POSTGRES_URL=your_postgresql_connection_string
+AUTH_SECRET=your_private_random_session_signing_secret
 ```
 
-Configure any additional authentication or deployment environment variables required by the current application code.
+- `POSTGRES_URL` connects the application to PostgreSQL.
+- `AUTH_SECRET` signs and verifies session tokens. Replace the placeholder with a private, cryptographically random secret.
+
+Set both variables in your hosting provider's environment settings as well. Keep them server-side; do not expose them through `NEXT_PUBLIC_` variables.
 
 Use the correct credentials for your development database. Never commit `.env.local`, database passwords, session secrets, or other sensitive values to GitHub.
 
@@ -210,7 +229,7 @@ Use the correct credentials for your development database. Never commit `.env.lo
 
 Ensure the PostgreSQL database is available and that the application's required schema and migrations have been applied before testing database-dependent features.
 
-Use the project's existing database setup and migration scripts. Check the relevant scripts and project instructions before running migrations.
+See the [documented database schema](docs/database-schema.md) for the merged tables and relationships. Contact-preference migrations belong to PR #45; inquiry-response and inquiry-message migrations belong to PR #47. Review and approve those changes before applying their migrations to an intended environment.
 
 ### Run the Development Server
 
@@ -228,7 +247,7 @@ Run the automated test suite:
 npm test
 ```
 
-Run the database integration tests when the test database and required environment variables are configured:
+Run the database integration tests only against a dedicated test database with the required environment variables configured. These tests create transactional fixtures and roll them back; do not run them against production:
 
 ```bash
 npm run test:db
@@ -238,6 +257,12 @@ Run ESLint:
 
 ```bash
 npm run lint
+```
+
+Check TypeScript:
+
+```bash
+npx tsc --noEmit
 ```
 
 Format files using Prettier when needed:
@@ -264,15 +289,17 @@ UniMarket requires a hosting environment that supports Next.js and can connect s
 
 Before deploying:
 
-1. Configure the required environment variables in the hosting provider.
+1. Configure `POSTGRES_URL` and `AUTH_SECRET` in the hosting provider.
 2. Ensure the production database schema and migrations are up to date.
 3. Run the production build and resolve any build errors.
 4. Deploy the application.
-5. Test registration, login, logout, listing operations, inquiries, and messaging on the deployed application.
+5. Test registration, login, logout, listing operations, inquiry submission, and received inquiries on the deployed application.
 
-**Live application:** [Add the public deployment URL] (Waiting for you Nephi)
+Verify profile updates and two-way messaging after PR #45 and PR #47 are merged and their approved migrations are applied.
 
-**GitHub repository: https://github.com/NephiImo/unimarket
+**Live application:** [UniMarket](https://unimarket-psi.vercel.app)
+
+**GitHub repository:** [NephiImo/unimarket](https://github.com/NephiImo/unimarket)
 
 ## Known Issues and Future Improvements
 
