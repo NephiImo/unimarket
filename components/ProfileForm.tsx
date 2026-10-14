@@ -1,6 +1,8 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type ProfileFormProps = {
     name: string;
@@ -14,6 +16,8 @@ type Profile = {
 };
 
 export default function ProfileForm({ name, email }: ProfileFormProps) {
+    const router = useRouter();
+
     const [displayName, setDisplayName] = useState(name);
     const [contactPreference, setContactPreference] =
         useState<"email" | "in_app">("email");
@@ -78,6 +82,8 @@ export default function ProfileForm({ name, email }: ProfileFormProps) {
             setDisplayName(data.profile.name);
             setContactPreference(data.profile.contact_preference);
             setMessage("Profile updated successfully.");
+
+            router.refresh();
         } catch {
             setMessage("Something went wrong. Please try again.");
         } finally {
@@ -161,7 +167,11 @@ export default function ProfileForm({ name, email }: ProfileFormProps) {
                     disabled={loading || saving}
                     className="rounded-md bg-[#C96F52] px-5 py-2 font-medium text-white hover:opacity-90 disabled:opacity-60"
                 >
-                    {loading ? "Loading Profile..." : saving ? "Saving..." : "Save Changes"}
+                    {loading
+                        ? "Loading Profile..."
+                        : saving
+                          ? "Saving..."
+                          : "Save Changes"}
                 </button>
             </form>
         </section>

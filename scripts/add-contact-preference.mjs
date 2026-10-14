@@ -1,4 +1,15 @@
+
 import postgres from "postgres";
+import { existsSync } from "node:fs";
+
+if (existsSync(".env.local")) {
+    process.loadEnvFile(".env.local");
+}
+
+if (!process.env.POSTGRES_URL) {
+    console.error("POSTGRES_URL is missing from .env.local or the environment.");
+    process.exit(1);
+}
 
 const sql = postgres(process.env.POSTGRES_URL, {
     ssl: "require",
