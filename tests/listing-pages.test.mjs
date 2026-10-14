@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import * as React from 'react';
 import { createElement } from 'react';
 import * as jsxRuntime from 'react/jsx-runtime';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -35,6 +36,18 @@ function loadPage(
   const calls = { categories: 0, listing: 0 };
   const categories = [{ id: 42, name: 'Furniture' }];
   const formProps = [];
+  const profileProps = [];
+  const ProfileForm = loadModule('components/ProfileForm.tsx', {
+    react: React,
+    'react/jsx-runtime': jsxRuntime,
+    'next/navigation': {
+      useRouter: () => ({
+        refresh() {
+          calls.profileRefresh = (calls.profileRefresh ?? 0) + 1;
+        },
+      }),
+    },
+  }).default;
   const dependencies = {
     'react/jsx-runtime': jsxRuntime,
     'next/link': {
@@ -85,9 +98,16 @@ function loadPage(
       default: () => createElement('form', { 'data-testid': 'inquiry-form' }),
       __esModule: true,
     },
+    '@/components/ProfileForm': {
+      default: (props) => {
+        profileProps.push(props);
+        return createElement(ProfileForm, props);
+      },
+      __esModule: true,
+    },
   };
   const exports = loadModule(relativePath, dependencies);
-  return { page: exports.default, calls, categories, formProps };
+  return { page: exports.default, calls, categories, formProps, profileProps };
 }
 
 test('new and edit pages redirect visitors before querying PostgreSQL', async () => {
@@ -184,10 +204,38 @@ test('dashboard preserves profile and inquiry navigation alongside owner actions
   assert.equal(calls.ownerId, owner.id);
   assert.match(html, /Profile Information/);
   assert.ok(html.includes(owner.email));
+  assert.ok(html.includes(`href="/listings/${listing.id}"`));
   assert.ok(html.includes(`href="/listings/${listing.id}/edit"`));
+  assert.match(html, /<button>Delete<\/button>/);
+  assert.ok(html.includes('href="/listings/new"'));
   assert.ok(html.includes('href="/inquiries/received"'));
   assert.match(html, /Received Inquiries/);
   assert.match(html, /deleted successfully/);
+});
+
+test('dashboard renders the real profile form with only public account fields', async () => {
+  const passwordHash = 'TEST_PASSWORD_HASH_DO_NOT_EXPOSE';
+  const { page, profileProps } = loadPage('app/dashboard/page.tsx', {
+    user: {
+      ...owner,
+      password_hash: passwordHash,
+      created_at: new Date('2026-10-01T00:00:00Z'),
+    },
+  });
+  const html = renderToStaticMarkup(
+    await page({ searchParams: Promise.resolve({}) })
+  );
+
+  assert.deepEqual(profileProps, [{ name: owner.name, email: owner.email }]);
+  assert.ok(!html.includes(passwordHash));
+  assert.match(html, /<input\b[^>]*id="displayName"[^>]*value="Listing owner"/);
+  assert.match(
+    html,
+    /<input\b[^>]*id="email"[^>]*readOnly=""[^>]*value="owner@example.invalid"/
+  );
+  assert.match(html, /<label\b[^>]*for="contactPreference"/);
+  assert.match(html, /<select\b[^>]*id="contactPreference"/);
+  assert.match(html, /In-app messages/);
 });
 
 test('empty and failed listing loads preserve the received-inquiries navigation', async () => {
