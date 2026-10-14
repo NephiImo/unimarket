@@ -12,5 +12,10 @@ export default async function ReceivedInquiriesPage() {
 
     const inquiries = await getReceivedInquiries(user.id);
 
-    return <InquiriesPageContent inquiries={inquiries} />;
+    return (
+        <InquiriesPageContent
+            inquiries={inquiries}
+            currentUserId={user.id}
+        />
+    );
 }
