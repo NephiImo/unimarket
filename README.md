@@ -1,6 +1,6 @@
 # UniMarket
 
-UniMarket is a student marketplace that allows university students to buy and sell items within their school community.
+UniMarket is a student marketplace that helps university students buy and sell items within their school community. Students can browse listings, post items for sale, manage their listings, and communicate with interested buyers through inquiries and messaging.
 
 ## Team Members
 
@@ -12,164 +12,281 @@ UniMarket is a student marketplace that allows university students to buy and se
 
 ## Project Description
 
-UniMarket provides students with a simple platform to create accounts, post items for sale, browse and search listings, manage their own listings, and send inquiries to sellers.
+Buying and selling within a student community can be inconvenient when listings and conversations are scattered across different platforms. UniMarket brings item discovery, listing management, and buyer-seller communication together in one application.
+
+The application provides user accounts, searchable listings, listing management, profiles, and inquiry conversations. It is designed to make it easier for students to find items, advertise products, and communicate with potential buyers.
 
 ## Technology Stack
 
-- Next.js
-- TypeScript
-- Tailwind CSS
-- App Router
-- PostgreSQL
+- **Frontend:** Next.js, React, TypeScript
+- **Routing:** Next.js App Router
+- **Styling:** Tailwind CSS
+- **Database:** PostgreSQL
+- **Authentication and security:** Server-side authentication, password hashing with `bcryptjs`, and session/token utilities using `jose`
+- **Code quality:** ESLint and Prettier
+- **Version control:** Git and GitHub
 
 ## Core Features
 
-- User registration, login, and logout
-- Browse and search listings
+### User Authentication
+
+- User registration
+- User login and logout
+- Password hashing
+- Protected pages and actions
+- Authentication checks for restricted operations
+
+### Listings
+
+- Browse available listings
+- Search for items
 - View individual listing details
-- Create, edit, and delete listings
-- User profile and dashboard
-- Buyer-to-seller inquiries
+- Create listings
+- Edit and delete listings
+- Associate listings with their owners and categories
 
-## Core Data Model
+### Profiles and Dashboard
 
-### User / Profile
+- View profile information
+- Access the user dashboard
+- Manage personal listings and relevant account information
 
-Stores account and profile information for each student.
+### Buyer and Seller Inquiries
 
-A user can:
-- own multiple listings
-- send multiple inquiries
+- Send an inquiry about a listing
+- View inquiries received by sellers
+- Submit a seller response
+- Continue conversations through inquiry messaging
+- Restrict inquiry and messaging access to authorized participants
 
-### Listing
+## Application Routes
 
-Represents an item posted for sale.
+The application uses the Next.js App Router. The following routes describe the main user-facing pages; verify the current implementation before treating this list as exhaustive.
 
-A listing:
-- belongs to one user
-- belongs to one category
-- can receive multiple inquiries
+| Route | Purpose |
+|---|---|
+| `/` | Home page |
+| `/listings` | Browse and search listings |
+| `/listings/[id]` | View listing details |
+| `/listings/new` | Create a listing |
+| `/listings/[id]/edit` | Edit a listing |
+| `/dashboard` | User dashboard and profile |
+| `/inquiries/sent` | View inquiries sent by the user |
+| `/inquiries/received` | View inquiries received by the user |
+| `/login` | Sign in |
+| `/register` | Create an account |
 
-### Category
+## API Documentation
 
-Groups listings into categories.
+The API routes use the Next.js App Router to handle authentication, listing operations, inquiries, and messaging.
 
-A category can contain multiple listings.
+### Authentication
 
-### Inquiry
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/auth/register` | Register a user |
+| POST | `/api/auth/login` | Authenticate a user |
+| POST | `/api/auth/logout` | End the user's session |
 
-Represents a message sent by a buyer about a listing.
+### Listings
 
-An inquiry:
-- belongs to one listing
-- is sent by one user
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/listings` | Retrieve listings |
+| POST | `/api/listings` | Create a listing |
+| GET | `/api/listings/[id]` | Retrieve a specific listing |
+| PATCH | `/api/listings/[id]` | Update a listing |
+| DELETE | `/api/listings/[id]` | Delete a listing |
 
-## Component and Page Structure
+### Inquiries and Messaging
 
-Planned routes include:
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/listings/[id]/inquiries` | Send an inquiry about a listing |
+| GET | `/api/inquiries/received` | Retrieve inquiries received by the current user |
+| GET | `/api/inquiries/[id]/messages` | Retrieve messages in an inquiry conversation |
+| POST | `/api/inquiries/[id]/messages` | Send a message in an inquiry conversation |
+| POST | `/api/inquiries/[id]/response` | Submit a seller response |
 
-- `/` — Home page
-- `/listings` — Browse and search listings
-- `/listings/[id]` — Listing details
-- `/listings/new` — Create a listing
-- `/listings/[id]/edit` — Edit a listing
-- `/dashboard` — User dashboard/profile
-- `/inquiries` — Seller inquiries
-- `/login` — Login
-- `/register` — Registration
+Protected operations require appropriate authentication and authorization. Requests are validated on the server, and access to listings and inquiry conversations is restricted according to the user's permissions.
 
-Reusable components include:
+## Database and Data Model
 
-- Header
-- Footer
-- Navigation
-- SearchBar
-- FilterBar
-- ListingCard
-- ListingForm
-- ListingDetails
-- Button
-- Loading states
+UniMarket uses PostgreSQL to store application data.
 
-## Design Direction
+### Users
+
+Stores user account information, including identity and authentication-related data.
+
+A user can own multiple listings and send multiple inquiries.
+
+### Listings
+
+Represents items advertised for sale.
+
+Each listing belongs to a user and a category. A listing can receive multiple inquiries.
+
+### Categories
+
+Groups listings into categories so users can browse and discover relevant items.
+
+### Inquiries
+
+Represents a buyer's inquiry about a listing.
+
+Each inquiry is associated with a listing and the user who sent it. Inquiries support communication between buyers and sellers.
+
+### Inquiry Messages
+
+The inquiry messaging feature uses an `inquiry_messages` table to store conversation messages, including the associated inquiry, sender, message content, and creation time.
+
+Confirm that the database migration has been applied successfully in the target environment before relying on this table.
+
+## Design and User Experience
+
+UniMarket uses a warm, consistent visual style intended to make browsing and managing listings straightforward.
 
 ### Color Palette
 
-- Warm Porcelain — `#F6F1EA`
-- Muted Terracotta — `#C96F52`
-- Soft Sage — `#879B7A`
-- Dusty Plum — `#765C68`
-- Cocoa Brown — `#352B28`
-- Soft Ivory — `#FFFDFC`
-- Blush Peach — `#EBC8BA`
+- Soft Ivory: `#FFFDFC`
+- Muted Terracotta: `#C96F52`
+- Cocoa Brown: `#352B28`
+- Muted Text: `#746963`
+- Blush Peach: `#EBC8BA`
 
-### Typography
+### Typography and Layout
 
-- Inter
+- Inter typography
+- Responsive layouts for desktop and mobile
+- Card-based listing presentation
+- Consistent spacing and border radius
+- Clear primary and secondary actions
+- Reusable components for a consistent experience
 
-### Layout
+## Getting Started
 
-- Responsive mobile-first design
-- Consistent spacing
-- Card-based listing layout
-- Responsive grid
-- Clear primary and secondary buttons
-- Consistent border radius
-- Tailwind CSS for styling
+### Prerequisites
 
-## Week 04 Priority Work
+Install the following before running the application locally:
 
-The highest-priority implementation work is tracked using the **Week 04** GitHub milestone.
+- Node.js
+- npm
+- Git
+- Access to a PostgreSQL database
 
-Current priority issues:
+### Installation
 
-- #13 — App shell and shared navigation
-- #14 — UniMarket home page
-- #15 — PostgreSQL schema
-- #16 — Listings API and data access layer
-- #17 — Listings browse UI and reusable ListingCard
-- #18 — Listing detail page
+Clone the team repository:
 
-## Feature Ownership
+```bash
+git clone <TEAM_REPOSITORY_URL>
+```
 
-### Nephi Imo
-- #13 — App shell and shared navigation
-- #17 — Listings browse UI and reusable ListingCard
-- #21 — Frontend/database integration
-- #23 — Buyer-to-seller inquiry flow
+Move into the project directory:
 
-### Assumpta Chidinma Okpanachi
-- #15 — PostgreSQL schema
-- #14 — UniMarket home page
-- Backend/database support
+```bash
+cd unimarket
+```
 
-### Okoro Osahon
-- #18 — Listing detail page
-- #19 — Create and edit listing forms
-- #20 — Authentication and protected routes
+Install dependencies:
 
-### Ariane Arias Peralta
-- #16 — Listings API and data access layer
-- #22 — Profile and dashboard experience
+```bash
+npm install
+```
 
-## Dependencies
+### Environment Configuration
 
-Important development dependencies include:
+Create a `.env.local` file in the project root and configure the PostgreSQL connection:
 
-- The PostgreSQL schema should be defined before the database-backed API is completed.
-- Shared TypeScript types and API contracts should be agreed on before frontend/backend integration.
-- The listings API depends on the PostgreSQL schema.
-- Frontend/database integration depends on both the schema and listings API.
-- Authentication is required before protected listing, profile, and inquiry functionality can be completed.
-- Shared layout and navigation should be established early so feature pages use a consistent structure.
+```env
+POSTGRES_URL=your_postgresql_connection_string
+```
 
-## Team Coordination
+Configure any additional authentication or deployment environment variables required by the current application code.
 
-The team will use Microsoft Teams for asynchronous progress updates and blockers during the week.
+Use the correct credentials for your development database. Never commit `.env.local`, database passwords, session secrets, or other sensitive values to GitHub.
 
-Team members should report:
-- what they completed
-- what they are currently working on
-- any blockers or dependencies affecting their work
+### Database Setup
 
-GitHub issues and pull requests will be used to track implementation and code review.
+Ensure the PostgreSQL database is available and that the application's required schema and migrations have been applied before testing database-dependent features.
+
+Use the project's existing database setup and migration scripts. Check the relevant scripts and project instructions before running migrations.
+
+### Run the Development Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Testing and Code Quality
+
+Run the automated test suite:
+
+```bash
+npm test
+```
+
+Run the database integration tests when the test database and required environment variables are configured:
+
+```bash
+npm run test:db
+```
+
+Run ESLint:
+
+```bash
+npm run lint
+```
+
+Format files using Prettier when needed:
+
+```bash
+npx prettier --write .
+```
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+After a successful production build, run the application locally with:
+
+```bash
+npm start
+```
+
+## Deployment
+
+UniMarket requires a hosting environment that supports Next.js and can connect securely to the configured PostgreSQL database.
+
+Before deploying:
+
+1. Configure the required environment variables in the hosting provider.
+2. Ensure the production database schema and migrations are up to date.
+3. Run the production build and resolve any build errors.
+4. Deploy the application.
+5. Test registration, login, logout, listing operations, inquiries, and messaging on the deployed application.
+
+**Live application:** [Add the public deployment URL] (Waiting for you Nephi)
+
+**GitHub repository: https://github.com/NephiImo/unimarket
+
+## Known Issues and Future Improvements
+
+Potential areas for continued improvement include:
+
+- Improving Lighthouse performance and accessibility scores.
+- Testing responsive layouts across different mobile screen sizes.
+- Expanding automated tests for authentication, listing operations, and inquiry messaging.
+- Improving the messaging experience and adding useful conversation-management features.
+
+These are potential improvement areas, not a confirmed list of outstanding defects. Update this section to reflect the issues and improvements that remain after the final application review.
+
+## Project Maintenance
+
+The team uses GitHub branches, issues, and pull requests to organize development and review code changes. Microsoft Teams is used for progress updates and discussion of blockers.
+
+Changes should be tested before merging. The README should be kept up to date as features, routes, database structure, setup requirements, and deployment details change.
