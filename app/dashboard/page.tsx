@@ -1,9 +1,9 @@
-
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/app/lib/auth/get-current-user";
 import { getListingsByUserId, type Listing } from "@/app/lib/listings/queries";
 import DeleteListingButton from "@/components/DeleteListingButton";
+import ProfileForm from "@/components/ProfileForm";
 
 export default async function DashboardPage({
     searchParams,
@@ -39,46 +39,7 @@ export default async function DashboardPage({
                     </p>
                 </div>
 
-                <section className="mb-6 rounded-lg bg-white p-6 shadow-sm">
-                    <h2 className="mb-4 text-xl font-semibold text-gray-900">
-                        Profile Information
-                    </h2>
-
-                    <div className="space-y-4">
-                        <div>
-                            <label
-                                htmlFor="displayName"
-                                className="mb-1 block text-sm font-medium text-gray-700"
-                            >
-                                Display Name
-                            </label>
-
-                            <input
-                                id="displayName"
-                                type="text"
-                                defaultValue={user.name}
-                                className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                            />
-                        </div>
-
-                        <div>
-                            <label
-                                htmlFor="email"
-                                className="mb-1 block text-sm font-medium text-gray-700"
-                            >
-                                Email
-                            </label>
-
-                            <input
-                                id="email"
-                                type="email"
-                                value={user.email}
-                                readOnly
-                                className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2"
-                            />
-                        </div>
-                    </div>
-                </section>
+                <ProfileForm name={user.name} email={user.email} />
 
                 <section className="rounded-lg bg-white p-6 shadow-sm">
                     <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -158,7 +119,11 @@ export default async function DashboardPage({
                                             <p className="mt-2 font-medium text-[#C96F52]">
                                                 ₦
                                                 {Number(
+
                                                     listing.price,
+
+                                                    listing.price
+
                                                 ).toLocaleString("en-NG", {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
@@ -200,7 +165,8 @@ export default async function DashboardPage({
                     </h2>
 
                     <p className="mt-2 text-gray-600">
-                        View messages from students interested in your listings.
+                        View messages from students interested in your
+                        listings.
                     </p>
 
                     <Link
