@@ -68,7 +68,7 @@ export default function InquiryForm({ listingId }: InquiryFormProps) {
         Contact the seller
       </h2>
 
-      <p className="mt-1 text-sm text-[#64748B]">
+      <p className="mt-1 text-sm text-[#514741]">
         Send a message about this listing.
       </p>
 
@@ -95,23 +95,23 @@ export default function InquiryForm({ listingId }: InquiryFormProps) {
             maxLength={MAX_MESSAGE_LENGTH}
             rows={5}
             required
-            className="w-full rounded-md border border-[#CBD5E1] px-3 py-2 text-[#352B28] outline-none focus:border-[#C96F52]"
+            className="w-full rounded-md border border-[#CBD5E1] px-3 py-2 text-[#352B28] outline-none placeholder:text-[#514741] focus:border-[#783322] focus:ring-2 focus:ring-[#783322]"
             placeholder="Hi, I'm interested in this item..."
           />
 
-          <p className="mt-1 text-right text-xs text-[#64748B]">
+          <p className="mt-1 text-right text-xs text-[#514741]">
             {message.length}/{MAX_MESSAGE_LENGTH}
           </p>
         </div>
 
         {status === "error" && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-sm text-red-800">
             {error}
           </p>
         )}
 
         {status === "success" && (
-          <p role="status" className="text-sm text-green-700">
+          <p role="status" className="text-sm text-green-900">
             Your inquiry was sent successfully.
           </p>
         )}
@@ -119,7 +119,7 @@ export default function InquiryForm({ listingId }: InquiryFormProps) {
         <button
           type="submit"
           disabled={status === "sending"}
-          className="rounded-md bg-[#C96F52] px-4 py-2 font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-md bg-[#783322] px-4 py-2 font-medium text-white hover:bg-[#5C2618] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#783322] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {status === "sending" ? "Sending..." : "Send inquiry"}
         </button>

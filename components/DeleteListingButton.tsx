@@ -74,17 +74,17 @@ export default function DeleteListingButton({
         onClick={handleDelete}
         disabled={deleting}
         aria-label={`Delete ${title}`}
-        className="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700 disabled:cursor-wait disabled:opacity-60"
+        className="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-800 disabled:cursor-wait disabled:opacity-60"
       >
         {deleting ? 'Deleting…' : 'Delete'}
       </button>
       {deleting && (
-        <p role="status" className="mt-2 text-sm text-gray-600">
+        <p role="status" className="mt-2 text-sm text-[#514741]">
           Deleting listing…
         </p>
       )}
       {error && (
-        <p role="alert" className="mt-2 max-w-sm text-sm text-red-700">
+        <p role="alert" className="mt-2 max-w-sm text-sm text-red-800">
           {error}{' '}
           {requiresLogin && (
             <Link href="/login" className="underline">

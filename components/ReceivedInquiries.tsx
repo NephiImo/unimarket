@@ -3,57 +3,75 @@ import SellerResponseForm from "@/components/SellerResponseForm";
 import InquiryChat from "@/components/InquiryChat";
 
 interface ReceivedInquiriesProps {
-    inquiries: ReceivedInquiry[];
-    currentUserId: string;
+  inquiries: ReceivedInquiry[];
+  currentUserId: string;
 }
 
 export default function ReceivedInquiries({
-    inquiries,
-    currentUserId,
+  inquiries,
+  currentUserId,
 }: ReceivedInquiriesProps) {
-    if (inquiries.length === 0) {
-        return (
-            <div className="rounded-lg border border-[#E2E8F0] bg-white p-6 text-center">
-                <h2 className="font-semibold text-[#352B28]">
-                    No inquiries yet
-                </h2>
-                <p className="mt-1 text-sm text-[#64748B]">
-                    Messages from interested buyers will appear here.
-                </p>
-            </div>
-        );
-    }
-
+  if (inquiries.length === 0) {
     return (
-        <div className="space-y-4">
-            {inquiries.map((inquiry) => (
-                <article
-                    key={inquiry.id}
-                    className="rounded-lg border border-[#E2E8F0] bg-white p-5"
-                >
-                    <h2 className="font-semibold text-[#352B28]">
-                        {inquiry.listing_title}
-                    </h2>
+      <div className="rounded-lg border border-[#E2E8F0] bg-white p-6 text-center">
+        <h2 className="font-semibold text-[#352B28]">No inquiries yet</h2>
 
-                    <p className="text-sm text-[#64748B]">
-                        From {inquiry.sender_name}
-                    </p>
-
-                    <p className="mt-4 whitespace-pre-line text-[#352B28]">
-                        {inquiry.message}
-                    </p>
-
-                    <SellerResponseForm
-                        inquiryId={inquiry.id}
-                        existingResponse={inquiry.seller_response}
-                    />
-
-                    <InquiryChat
-                        inquiryId={inquiry.id}
-                        currentUserId={currentUserId}
-                    />
-                </article>
-            ))}
-        </div>
+        <p className="mt-1 text-sm text-[#514741]">
+          Messages from interested buyers will appear here.
+        </p>
+      </div>
     );
+  }
+
+  return (
+    <div className="space-y-4">
+      {inquiries.map((inquiry) => {
+        const sentAt = new Date(inquiry.created_at).toLocaleDateString(
+          "en-US",
+          {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          },
+        );
+
+        return (
+          <article
+            key={inquiry.id}
+            className="rounded-lg border border-[#E2E8F0] bg-white p-5"
+          >
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="font-semibold text-[#352B28]">
+                  {inquiry.listing_title}
+                </h2>
+
+                <p className="text-sm text-[#514741]">
+                  From {inquiry.sender_name}
+                </p>
+              </div>
+
+              <time className="text-sm text-[#514741]">
+                {sentAt}
+              </time>
+            </div>
+
+            <p className="mt-4 whitespace-pre-line text-[#352B28]">
+              {inquiry.message}
+            </p>
+
+            <SellerResponseForm
+              inquiryId={inquiry.id}
+              existingResponse={inquiry.seller_response}
+            />
+
+            <InquiryChat
+              inquiryId={inquiry.id}
+              currentUserId={currentUserId}
+            />
+          </article>
+        );
+      })}
+    </div>
+  );
 }

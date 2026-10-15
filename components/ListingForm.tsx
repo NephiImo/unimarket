@@ -37,12 +37,12 @@ const fields = [
 ] as const;
 
 const inputClassName =
-  'w-full rounded-lg border border-[#ebc8ba] bg-[#fffdfc] px-3 py-2.5 text-[#352b28] outline-none focus:border-[#c96f52] focus:ring-2 focus:ring-[#c96f52]/30 aria-invalid:border-red-500 disabled:opacity-60';
+  'w-full rounded-lg border border-[#ebc8ba] bg-[#fffdfc] px-3 py-2.5 text-[#352b28] outline-none placeholder:text-[#514741] focus:border-[#783322] focus:ring-2 focus:ring-[#783322] aria-invalid:border-red-500 disabled:opacity-60';
 const labelClassName = 'mb-1 block text-sm font-medium text-[#352b28]';
 
 function FieldError({ name, message }: { name: string; message?: string }) {
   return message ? (
-    <p id={`${name}-error`} className="mt-1 text-sm text-red-700">
+    <p id={`${name}-error`} className="mt-1 text-sm text-red-800">
       {message}
     </p>
   ) : null;
@@ -217,7 +217,7 @@ export default function ListingForm({ categories, listing }: ListingFormProps) {
       aria-busy={pending}
       className="space-y-5"
     >
-      <p className="text-sm text-[#746963]">
+      <p className="text-sm text-[#514741]">
         All fields are required except the image URL.
       </p>
 
@@ -364,7 +364,7 @@ export default function ListingForm({ categories, listing }: ListingFormProps) {
       {message && (
         <div
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+          className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"
         >
           <p>{message}</p>
           {needsLogin && (
@@ -382,7 +382,7 @@ export default function ListingForm({ categories, listing }: ListingFormProps) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-[#c96f52] px-5 py-2.5 font-semibold text-white hover:bg-[#b85f45] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c96f52] disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-lg bg-[#783322] px-5 py-2.5 font-semibold text-white hover:bg-[#5C2618] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#783322] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {pending
             ? 'Saving...'
@@ -392,7 +392,7 @@ export default function ListingForm({ categories, listing }: ListingFormProps) {
         </button>
         <Link
           href={listing ? `/listings/${listing.id}` : '/dashboard'}
-          className="rounded px-2 py-2 text-sm font-medium text-[#746963] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c96f52]"
+          className="rounded px-2 py-2 text-sm font-medium text-[#514741] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#783322]"
         >
           Cancel
         </Link>

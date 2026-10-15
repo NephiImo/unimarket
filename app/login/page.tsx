@@ -50,7 +50,7 @@ export default function LoginPage() {
         <main className="flex min-h-screen items-center justify-center bg-[#fffdfc] px-6 py-10">
             <div className="w-full max-w-md rounded-2xl border border-[#ebc8ba]/60 bg-white p-8 shadow-sm">
                 <div className="mb-8">
-                    <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-[#c96f52]">
+                    <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-[#783322]">
                         UniMarket
                     </p>
 
@@ -58,7 +58,7 @@ export default function LoginPage() {
                         Welcome back
                     </h1>
 
-                    <p className="mt-2 text-[#746963]">
+                    <p className="mt-2 text-[#514741]">
                         Sign in to access your UniMarket account.
                     </p>
                 </div>
@@ -79,7 +79,7 @@ export default function LoginPage() {
                             onChange={(event) => setEmail(event.target.value)}
                             required
                             placeholder="you@example.com"
-                            className="w-full rounded-lg border border-[#ebc8ba] bg-[#fffdfc] px-3 py-2.5 text-[#352b28] outline-none placeholder:text-[#746963]/60 focus:border-[#c96f52] focus:ring-2 focus:ring-[#c96f52]/20"
+                            className="w-full rounded-lg border border-[#ebc8ba] bg-[#fffdfc] px-3 py-2.5 text-[#352b28] outline-none placeholder:text-[#514741] focus:border-[#783322] focus:ring-2 focus:ring-[#783322]"
                         />
                     </div>
 
@@ -98,12 +98,12 @@ export default function LoginPage() {
                             onChange={(event) => setPassword(event.target.value)}
                             required
                             placeholder="Enter your password"
-                            className="w-full rounded-lg border border-[#ebc8ba] bg-[#fffdfc] px-3 py-2.5 text-[#352b28] outline-none placeholder:text-[#746963]/60 focus:border-[#c96f52] focus:ring-2 focus:ring-[#c96f52]/20"
+                            className="w-full rounded-lg border border-[#ebc8ba] bg-[#fffdfc] px-3 py-2.5 text-[#352b28] outline-none placeholder:text-[#514741] focus:border-[#783322] focus:ring-2 focus:ring-[#783322]"
                         />
                     </div>
 
                     {error && (
-                        <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                        <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
                             {error}
                         </p>
                     )}
@@ -111,17 +111,17 @@ export default function LoginPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full rounded-lg bg-[#c96f52] px-4 py-2.5 font-semibold text-white transition hover:bg-[#b85f45] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="w-full rounded-lg bg-[#783322] px-4 py-2.5 font-semibold text-white transition hover:bg-[#5C2618] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#783322] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         {loading ? "Signing in..." : "Sign In"}
                     </button>
                 </form>
 
-                <p className="mt-6 text-center text-sm text-[#746963]">
+                <p className="mt-6 text-center text-sm text-[#514741]">
                     Don&apos;t have an account?{" "}
                     <Link
                         href="/register"
-                        className="font-semibold text-[#c96f52] hover:underline"
+                        className="font-semibold text-[#783322] hover:underline"
                     >
                         Sign Up
                     </Link>

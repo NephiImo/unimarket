@@ -1,20 +1,15 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import { existsSync } from "node:fs";
 import test from "node:test";
-import { fileURLToPath } from "node:url";
 import { NextRequest, NextResponse } from "next/server.js";
 import postgres from "postgres";
 import { loadModule } from "./helpers/load-typescript.mjs";
 
-const localEnvironment = fileURLToPath(new URL("../.env.local", import.meta.url));
-if (existsSync(localEnvironment)) process.loadEnvFile(localEnvironment);
-
 test("PostgreSQL listing and inquiry lifecycle rolls back all fixtures", {
-    skip: !process.env.POSTGRES_URL && "POSTGRES_URL is unavailable",
+    skip: !process.env.TEST_POSTGRES_URL && "TEST_POSTGRES_URL is unavailable; use a dedicated test database",
     timeout: 60000,
 }, async () => {
-    const sql = postgres(process.env.POSTGRES_URL, {
+    const sql = postgres(process.env.TEST_POSTGRES_URL, {
         ssl: "require", prepare: false, connect_timeout: 10, max: 1,
     });
     const ownerId = randomUUID();
@@ -50,6 +45,7 @@ test("PostgreSQL listing and inquiry lifecycle rolls back all fixtures", {
                 });
                 const inquiryQueries = loadModule("app/lib/inquiries/queries.ts", {
                     "@/app/lib/db": transaction,
+                    "@/app/lib/inquiries/validation": loadModule("app/lib/inquiries/validation.ts"),
                 });
                 let sessionUser = { id: ownerId };
                 const dependencies = {

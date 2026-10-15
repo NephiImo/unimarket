@@ -63,7 +63,7 @@ export default async function DashboardPage({
                     {deleted === "1" && (
                         <p
                             role="status"
-                            className="mb-4 rounded-md bg-green-50 p-3 text-green-800"
+                            className="mb-4 rounded-md bg-green-50 p-3 text-green-900"
                         >
                             Your listing was deleted successfully.
                         </p>
@@ -92,7 +92,7 @@ export default async function DashboardPage({
                             </p>
                             <Link
                                 href="/listings/new"
-                                className="mt-3 inline-block font-medium text-[#C96F52] underline"
+                                className="mt-3 inline-block font-medium text-[#783322] underline"
                             >
                                 Create your first listing
                             </Link>
@@ -116,14 +116,10 @@ export default async function DashboardPage({
                                                 {listing.category_name} ·{" "}
                                                 {listing.location}
                                             </p>
-                                            <p className="mt-2 font-medium text-[#C96F52]">
+                                            <p className="mt-2 font-medium text-[#783322]">
                                                 ₦
                                                 {Number(
-
-                                                    listing.price,
-
                                                     listing.price
-
                                                 ).toLocaleString("en-NG", {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
@@ -171,7 +167,7 @@ export default async function DashboardPage({
 
                     <Link
                         href="/inquiries/received"
-                        className="mt-4 inline-block rounded-md bg-[#C96F52] px-5 py-2 font-medium text-white hover:opacity-90"
+                        className="mt-4 inline-block rounded-md bg-[#783322] px-5 py-2 font-medium text-white transition-colors hover:bg-[#5C2618]"
                     >
                         View Inquiries
                     </Link>
@@ -188,7 +184,7 @@ export default async function DashboardPage({
 
                     <Link
                         href="/inquiries/sent"
-                        className="mt-4 inline-block rounded-md bg-[#C96F52] px-5 py-2 font-medium text-white hover:opacity-90"
+                        className="mt-4 inline-block rounded-md bg-[#783322] px-5 py-2 font-medium text-white hover:bg-[#5C2618] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#783322]"
                     >
                         View My Inquiries
                     </Link>

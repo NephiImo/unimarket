@@ -32,7 +32,7 @@ export default async function ListingPage({
             <div className="mx-auto max-w-3xl">
                 <Link
                     href="/listings"
-                    className="mb-6 inline-block text-sm font-medium text-[#C96F52] hover:underline"
+                    className="mb-6 inline-block text-sm font-medium text-[#783322] hover:underline"
                 >
                     ← Back to listings
                 </Link>
@@ -51,7 +51,7 @@ export default async function ListingPage({
 
                         <Link
                             href="/login"
-                            className="mt-3 inline-block font-medium text-[#C96F52] hover:underline"
+                            className="mt-3 inline-block font-medium text-[#783322] hover:underline"
                         >
                             Log in
                         </Link>

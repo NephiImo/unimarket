@@ -1,5 +1,6 @@
 
 import sql from "@/app/lib/db";
+import { isInquiryId, validateInquiryText } from "@/app/lib/inquiries/validation";
 
 export type Inquiry = {
     id: string;
@@ -30,9 +31,44 @@ export type InquiryListing = {
     status: string;
 };
 
+export type InquiryConversation = Inquiry & {
+    listing_title: string;
+    seller_id: string;
+    seller_name: string;
+    sender_name: string;
+    seller_response: string | null;
+    responded_at: Date | null;
+};
+
+export async function getInquiryForParticipant(
+    inquiryId: string,
+    userId: string,
+): Promise<InquiryConversation | null> {
+    if (!isInquiryId(inquiryId) || !isInquiryId(userId)) return null;
+
+    const inquiries = await sql<InquiryConversation[]>`
+        SELECT
+            i.id, i.listing_id, i.sender_id, i.message, i.created_at,
+            i.seller_response, i.responded_at,
+            l.title AS listing_title, l.user_id AS seller_id,
+            seller.name AS seller_name, buyer.name AS sender_name
+        FROM inquiries i
+        JOIN listings l ON l.id = i.listing_id
+        JOIN users seller ON seller.id = l.user_id
+        JOIN users buyer ON buyer.id = i.sender_id
+        WHERE i.id = ${inquiryId}
+            AND (i.sender_id = ${userId} OR l.user_id = ${userId})
+        LIMIT 1
+    `;
+
+    return inquiries[0] ?? null;
+}
+
 export async function getInquiryListing(
     listingId: string,
 ): Promise<InquiryListing | null> {
+    if (!isInquiryId(listingId)) return null;
+
     const listings = await sql<InquiryListing[]>`
         SELECT id, user_id, title, status
         FROM listings
@@ -92,10 +128,14 @@ export async function createSellerResponse(
     sellerId: string,
     response: string,
 ): Promise<ReceivedInquiry | null> {
+    if (!isInquiryId(inquiryId) || !isInquiryId(sellerId)) return null;
+    const { value } = validateInquiryText({ response }, "response");
+    if (value === null) return null;
+
     const inquiries = await sql<ReceivedInquiry[]>`
         UPDATE inquiries AS i
         SET
-            seller_response = ${response},
+            seller_response = ${value},
             responded_at = CURRENT_TIMESTAMP
         FROM listings AS l, users AS u
         WHERE i.id = ${inquiryId}
@@ -152,6 +192,8 @@ export async function getInquiryMessages(
     inquiryId: string,
     userId: string,
 ): Promise<InquiryMessage[]> {
+    if (!isInquiryId(inquiryId) || !isInquiryId(userId)) return [];
+
     return sql<InquiryMessage[]>`
         SELECT
             m.id,
@@ -173,7 +215,7 @@ export async function getInquiryMessages(
                         OR l.user_id = ${userId}
                     )
             )
-        ORDER BY m.created_at ASC
+        ORDER BY m.created_at ASC, m.id ASC
     `;
 }
 
@@ -181,14 +223,18 @@ export async function createInquiryMessage(
     inquiryId: string,
     senderId: string,
     message: string,
-) {
-    const messages = await sql`
+): Promise<Omit<InquiryMessage, "sender_name"> | null> {
+    if (!isInquiryId(inquiryId) || !isInquiryId(senderId)) return null;
+    const { value } = validateInquiryText({ message });
+    if (value === null) return null;
+
+    const messages = await sql<Omit<InquiryMessage, "sender_name">[]>`
         INSERT INTO inquiry_messages (
             inquiry_id,
             sender_id,
             message
         )
-        SELECT i.id, ${senderId}, ${message}
+        SELECT i.id, ${senderId}, ${value}
         FROM inquiries i
         JOIN listings l ON l.id = i.listing_id
         WHERE i.id = ${inquiryId}
