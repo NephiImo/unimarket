@@ -22,7 +22,7 @@ const steps = [
 export default function HowItWorks() {
   return (
     <section className="px-6 py-20 lg:px-8">
-      <div className="mx-auto max-w-7xl rounded-3xl bg-[#765c68] px-6 py-14 sm:px-10 lg:px-16">
+      <div className="mx-auto max-w-7xl rounded-3xl bg-[#422B35] px-6 py-14 sm:px-10 lg:px-16">
         <div className="max-w-2xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#ebc8ba]">
             Simple by design
@@ -32,7 +32,7 @@ export default function HowItWorks() {
             How UniMarket works
           </h2>
 
-          <p className="mt-4 leading-7 text-[#f6f1ea]/80">
+          <p className="mt-4 leading-7 text-[#f6f1ea]">
             A simple way for students to discover useful items, connect with
             other students, and make exchanges within their campus community.
           </p>
@@ -52,7 +52,7 @@ export default function HowItWorks() {
                 {step.title}
               </h3>
 
-              <p className="mt-3 text-sm leading-6 text-[#f6f1ea]/75">
+              <p className="mt-3 text-sm leading-6 text-[#f6f1ea]">
                 {step.description}
               </p>
             </div>

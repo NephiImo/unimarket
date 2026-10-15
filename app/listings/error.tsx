@@ -13,14 +13,14 @@ export default function ListingsError({
           Something went wrong
         </h1>
 
-        <p className="mt-3 text-[#746963]">
+        <p className="mt-3 text-[#514741]">
           We couldn&apos;t load the listings right now. Please try again.
         </p>
 
         <button
           type="button"
           onClick={reset}
-          className="mt-6 rounded-lg bg-[#C96F52] px-5 py-2.5 font-medium text-white transition-opacity hover:opacity-90"
+          className="mt-6 rounded-lg bg-[#783322] px-5 py-2.5 font-medium text-white transition-colors hover:bg-[#5C2618]"
         >
           Try Again
         </button>
