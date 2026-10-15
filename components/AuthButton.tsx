@@ -23,7 +23,7 @@ export default function AuthButton({ isLoggedIn }: AuthButtonProps) {
             <button
                 type="button"
                 onClick={() => router.push("/login")}
-                className="rounded-lg border border-[#C96F52] px-4 py-2 text-[#C96F52] transition-colors hover:bg-[#C96F52] hover:text-[#FFFDFC]"
+                className="rounded-lg border border-[#C96F52] px-4 py-2 text-[#783322] hover:bg-[#5C2618] hover:text-[#FFFDFC] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#352B28]"
             >
                 Sign In
             </button>
@@ -34,7 +34,7 @@ export default function AuthButton({ isLoggedIn }: AuthButtonProps) {
         <button
             type="button"
             onClick={handleLogout}
-            className="rounded-lg border border-[#C96F52] px-4 py-2 text-[#C96F52] transition-colors hover:bg-[#C96F52] hover:text-[#FFFDFC]"
+            className="rounded-lg border border-[#C96F52] px-4 py-2 text-[#783322] hover:bg-[#5C2618] hover:text-[#FFFDFC] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#352B28]"
         >
             Sign Out
         </button>

@@ -5,7 +5,7 @@ export default function Hero() {
     <section className="px-6 py-20 lg:px-8 lg:py-28">
       <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2">
         <div>
-          <p className="mb-5 text-sm font-semibold uppercase tracking-[0.2em] text-[#879b7a]">
+          <p className="mb-5 text-sm font-semibold uppercase tracking-[0.2em] text-[#3A5634]">
             Buy • Sell • Connect
           </p>
 
@@ -13,7 +13,7 @@ export default function Hero() {
             Everything students need, right on campus.
           </h1>
 
-          <p className="mt-6 max-w-xl text-lg leading-8 text-[#746963]">
+          <p className="mt-6 max-w-xl text-lg leading-8 text-[#514741]">
             UniMarket makes it simple for students to buy, sell, and discover
             useful items within their campus community.
           </p>
@@ -21,14 +21,14 @@ export default function Hero() {
           <div className="mt-8 flex flex-col gap-4 sm:flex-row">
             <Link
               href="/listings"
-              className="rounded-full bg-[#c96f52] px-7 py-3.5 text-center text-sm font-semibold text-white transition-colors hover:bg-[#b85f45]"
+              className="rounded-full bg-[#783322] px-7 py-3.5 text-center text-sm font-semibold text-white transition-colors hover:bg-[#5C2618] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#352B28]"
             >
               Browse Listings
             </Link>
 
             <Link
               href="/listings/new"
-              className="rounded-full border border-[#c96f52] px-7 py-3.5 text-center text-sm font-semibold text-[#c96f52] transition-colors hover:bg-[#ebc8ba]/40"
+              className="rounded-full border border-[#c96f52] px-7 py-3.5 text-center text-sm font-semibold text-[#783322] transition-colors hover:bg-[#ebc8ba]/40 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#352B28]"
             >
               Sell an Item
             </Link>
@@ -38,13 +38,13 @@ export default function Hero() {
         <div className="relative">
           <div className="rounded-3xl bg-[#879b7a]/20 p-8 sm:p-12">
             <div className="rounded-2xl bg-[#fffdfc] p-8 shadow-sm">
-              <p className="text-sm font-medium text-[#746963]">
+              <p className="text-sm font-medium text-[#514741]">
                 What are you looking for?
               </p>
 
               <div className="mt-5 flex items-center gap-3 rounded-xl border border-[#ebc8ba] px-4 py-4">
-                <span className="text-[#746963]">⌕</span>
-                <span className="text-sm text-[#746963]">
+                <span className="text-[#514741]">⌕</span>
+                <span className="text-sm text-[#514741]">
                   Search books, electronics, fashion...
                 </span>
               </div>
@@ -54,7 +54,7 @@ export default function Hero() {
                   <p className="text-sm font-semibold text-[#352b28]">
                     Books
                   </p>
-                  <p className="mt-1 text-xs text-[#746963]">
+                  <p className="mt-1 text-xs text-[#514741]">
                     Find your next textbook
                   </p>
                 </div>
@@ -63,7 +63,7 @@ export default function Hero() {
                   <p className="text-sm font-semibold text-[#352b28]">
                     Electronics
                   </p>
-                  <p className="mt-1 text-xs text-[#746963]">
+                  <p className="mt-1 text-xs text-[#514741]">
                     Tech from students
                   </p>
                 </div>
@@ -72,7 +72,7 @@ export default function Hero() {
                   <p className="text-sm font-semibold text-[#352b28]">
                     Fashion
                   </p>
-                  <p className="mt-1 text-xs text-[#746963]">
+                  <p className="mt-1 text-xs text-[#514741]">
                     Style within reach
                   </p>
                 </div>
@@ -81,7 +81,7 @@ export default function Hero() {
                   <p className="text-sm font-semibold text-[#352b28]">
                     More
                   </p>
-                  <p className="mt-1 text-xs text-[#746963]">
+                  <p className="mt-1 text-xs text-[#514741]">
                     Explore everything
                   </p>
                 </div>

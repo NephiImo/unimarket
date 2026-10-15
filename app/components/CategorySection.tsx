@@ -17,9 +17,9 @@ const categories = [
     icon: "👟",
   },
   {
-    name: "Housing",
-    description: "Rooms, apartments & spaces",
-    icon: "🏠",
+    name: "Furniture",
+    description: "Desks, chairs & student essentials",
+    icon: "🪑",
   },
   {
     name: "Food",
@@ -39,7 +39,7 @@ export default function CategorySection() {
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#879b7a]">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3A5634]">
               Explore
             </p>
 
@@ -47,7 +47,7 @@ export default function CategorySection() {
               Find what you need
             </h2>
 
-            <p className="mt-3 max-w-xl text-[#746963]">
+            <p className="mt-3 max-w-xl text-[#514741]">
               Browse popular categories and discover what other students are
               buying and selling.
             </p>
@@ -55,7 +55,7 @@ export default function CategorySection() {
 
           <Link
             href="/listings"
-            className="text-sm font-semibold text-[#c96f52] hover:underline"
+            className="text-sm font-semibold text-[#783322] hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#352B28]"
           >
             View all listings →
           </Link>
@@ -66,14 +66,14 @@ export default function CategorySection() {
             <Link
               key={category.name}
               href={`/listings?category=${encodeURIComponent(category.name)}`}
-              className="group rounded-2xl border border-[#ebc8ba]/60 bg-[#fffdfc] p-6 transition-all hover:-translate-y-1 hover:border-[#c96f52]/40 hover:shadow-md"
+              className="group rounded-2xl border border-[#ebc8ba]/60 bg-[#fffdfc] p-6 transition-all hover:-translate-y-1 hover:border-[#c96f52]/40 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#352B28]"
             >
               <div className="flex items-start justify-between">
                 <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f6f1ea] text-2xl">
                   {category.icon}
                 </span>
 
-                <span className="text-[#746963] transition-transform group-hover:translate-x-1">
+                <span className="text-[#514741] transition-transform group-hover:translate-x-1">
                   →
                 </span>
               </div>
@@ -82,7 +82,7 @@ export default function CategorySection() {
                 {category.name}
               </h3>
 
-              <p className="mt-2 text-sm leading-6 text-[#746963]">
+              <p className="mt-2 text-sm leading-6 text-[#514741]">
                 {category.description}
               </p>
             </Link>

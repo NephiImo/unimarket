@@ -10,7 +10,7 @@ export default async function Header() {
             <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
                 <Link
                     href="/"
-                    className="text-2xl font-bold tracking-tight text-[#352B28]"
+                    className="text-2xl font-bold tracking-tight text-[#352B28] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#352B28]"
                 >
                     UniMarket
                 </Link>
@@ -21,28 +21,28 @@ export default async function Header() {
                 >
                     <Link
                         href="/"
-                        className="transition-colors hover:text-[#C96F52]"
+                        className="transition-colors hover:text-[#783322] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#352B28]"
                     >
                         Home
                     </Link>
 
                     <Link
                         href="/listings"
-                        className="transition-colors hover:text-[#C96F52]"
+                        className="transition-colors hover:text-[#783322] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#352B28]"
                     >
                         Browse
                     </Link>
 
                     <Link
                         href="/dashboard"
-                        className="transition-colors hover:text-[#C96F52]"
+                        className="transition-colors hover:text-[#783322] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#352B28]"
                     >
                         Dashboard
                     </Link>
 
                     <Link
                         href="/listings/new"
-                        className="rounded-lg bg-[#C96F52] px-4 py-2 text-[#FFFDFC] transition-opacity hover:opacity-90"
+                        className="rounded-lg bg-[#783322] px-4 py-2 text-[#FFFDFC] transition-colors hover:bg-[#5C2618] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#352B28]"
                     >
                         Sell an Item
                     </Link>

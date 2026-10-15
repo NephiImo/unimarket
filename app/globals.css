@@ -8,7 +8,7 @@
   --primary: #c96f52;
   --secondary: #879b7a;
   --accent: #765c68;
-  --muted-text: #746963;
+  --muted-text: #514741;
   --soft-accent: #ebc8ba;
 }
 
@@ -27,4 +27,9 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid #783322;
+  outline-offset: 3px;
 }

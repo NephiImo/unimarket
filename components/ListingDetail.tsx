@@ -21,12 +21,12 @@ export default async function ListingDetail({ listing }: ListingDetailProps) {
         <div className="flex items-start justify-between gap-4">
           <h1 className="text-3xl font-bold text-[#352B28]">{listing.title}</h1>
 
-          <span className="shrink-0 rounded-full bg-[#879B7A] px-3 py-1 text-sm font-medium capitalize text-white">
+          <span className="shrink-0 rounded-full bg-[#3A5634] px-3 py-1 text-sm font-medium capitalize text-white">
             {listing.status}
           </span>
         </div>
 
-        <p className="text-2xl font-semibold text-[#C96F52]">
+        <p className="text-2xl font-semibold text-[#783322]">
           ₦{Number(listing.price).toLocaleString()}
         </p>
       </header>
@@ -43,26 +43,26 @@ export default async function ListingDetail({ listing }: ListingDetailProps) {
 
       <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="rounded-lg border border-[#E2E8F0] bg-white p-4">
-          <dt className="text-sm text-[#64748B]">Category</dt>
+          <dt className="text-sm text-[#514741]">Category</dt>
           <dd className="font-medium text-[#352B28]">
             {listing.category_name ?? 'Uncategorized'}
           </dd>
         </div>
 
         <div className="rounded-lg border border-[#E2E8F0] bg-white p-4">
-          <dt className="text-sm text-[#64748B]">Seller</dt>
+          <dt className="text-sm text-[#514741]">Seller</dt>
           <dd className="font-medium text-[#352B28]">
             {listing.seller_name ?? 'Unknown seller'}
           </dd>
         </div>
 
         <div className="rounded-lg border border-[#E2E8F0] bg-white p-4">
-          <dt className="text-sm text-[#64748B]">Location</dt>
+          <dt className="text-sm text-[#514741]">Location</dt>
           <dd className="font-medium text-[#352B28]">{listing.location}</dd>
         </div>
 
         <div className="rounded-lg border border-[#E2E8F0] bg-white p-4">
-          <dt className="text-sm text-[#64748B]">Posted</dt>
+          <dt className="text-sm text-[#514741]">Posted</dt>
           <dd className="font-medium text-[#352B28]">{posted}</dd>
         </div>
       </dl>
@@ -70,7 +70,7 @@ export default async function ListingDetail({ listing }: ListingDetailProps) {
         <div className="flex flex-wrap items-start gap-3">
           <Link
             href={`/listings/${listing.id}/edit`}
-            className="rounded-md bg-[#C96F52] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+            className="rounded-md bg-[#783322] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#5C2618]"
           >
             Edit listing
           </Link>

@@ -16,7 +16,7 @@ export default async function NewListingPage() {
       <div className="mx-auto max-w-3xl">
         <Link
           href="/dashboard"
-          className="mb-6 inline-block text-sm font-medium text-[#C96F52] hover:underline"
+          className="mb-6 inline-block text-sm font-medium text-[#783322] hover:underline"
         >
           Back to dashboard
         </Link>
@@ -24,7 +24,7 @@ export default async function NewListingPage() {
           <h1 className="mb-2 text-3xl font-bold text-[#352b28]">
             Create a listing
           </h1>
-          <p className="mb-6 text-[#746963]">
+          <p className="mb-6 text-[#514741]">
             Share the details of the item you want to sell.
           </p>
           <ListingForm

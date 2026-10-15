@@ -27,12 +27,12 @@ export default async function EditListingPage({
           <h1 className="text-2xl font-bold text-[#352b28]">
             You cannot edit this listing
           </h1>
-          <p className="mt-3 text-[#746963]">
+          <p className="mt-3 text-[#514741]">
             Only the person who posted this listing can make changes.
           </p>
           <Link
             href="/dashboard"
-            className="mt-5 inline-block font-medium text-[#C96F52] hover:underline"
+            className="mt-5 inline-block font-medium text-[#783322] hover:underline"
           >
             Back to dashboard
           </Link>
@@ -48,7 +48,7 @@ export default async function EditListingPage({
       <div className="mx-auto max-w-3xl">
         <Link
           href={`/listings/${listing.id}`}
-          className="mb-6 inline-block text-sm font-medium text-[#C96F52] hover:underline"
+          className="mb-6 inline-block text-sm font-medium text-[#783322] hover:underline"
         >
           Back to listing
         </Link>
@@ -56,7 +56,7 @@ export default async function EditListingPage({
           <h1 className="mb-2 text-3xl font-bold text-[#352b28]">
             Edit listing
           </h1>
-          <p className="mb-6 text-[#746963]">
+          <p className="mb-6 text-[#514741]">
             Update your item details and availability.
           </p>
           <ListingForm
