@@ -113,7 +113,7 @@ export default function ProfileForm({ name, email }: ProfileFormProps) {
                         maxLength={100}
                         required
                         disabled={loading || saving}
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-[#C96F52] focus:ring-2 focus:ring-[#ebc8ba] disabled:opacity-60"
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-[#783322] focus:ring-2 focus:ring-[#783322] disabled:opacity-60"
                     />
                 </div>
 
@@ -149,7 +149,7 @@ export default function ProfileForm({ name, email }: ProfileFormProps) {
                             )
                         }
                         disabled={loading || saving}
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 disabled:opacity-60"
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#783322] disabled:opacity-60"
                     >
                         <option value="email">Email</option>
                         <option value="in_app">In-app messages</option>
@@ -165,7 +165,7 @@ export default function ProfileForm({ name, email }: ProfileFormProps) {
                 <button
                     type="submit"
                     disabled={loading || saving}
-                    className="rounded-md bg-[#C96F52] px-5 py-2 font-medium text-white hover:opacity-90 disabled:opacity-60"
+                    className="rounded-md bg-[#783322] px-5 py-2 font-medium text-white hover:bg-[#5C2618] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#783322] disabled:opacity-60"
                 >
                     {loading
                         ? "Loading Profile..."

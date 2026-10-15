@@ -47,7 +47,7 @@ export default function RegisterPage() {
         <main className="flex min-h-screen items-center justify-center bg-[#FFFDFC] px-6 py-10">
             <div className="w-full max-w-md rounded-2xl border border-[#EBC8BA]/60 bg-white p-8 shadow-sm">
                 <div className="mb-8">
-                    <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-[#C96F52]">
+                    <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-[#783322]">
                         UniMarket
                     </p>
 
@@ -55,7 +55,7 @@ export default function RegisterPage() {
                         Create an account
                     </h1>
 
-                    <p className="mt-2 text-[#746963]">
+                    <p className="mt-2 text-[#514741]">
                         Join UniMarket and start buying and selling on campus.
                     </p>
                 </div>
@@ -76,7 +76,7 @@ export default function RegisterPage() {
                             onChange={(event) => setName(event.target.value)}
                             required
                             placeholder="Your name"
-                            className="w-full rounded-lg border border-[#EBC8BA] bg-[#FFFDFC] px-3 py-2.5 text-[#352B28] outline-none placeholder:text-[#746963]/60 focus:border-[#C96F52] focus:ring-2 focus:ring-[#C96F52]/20"
+                            className="w-full rounded-lg border border-[#EBC8BA] bg-[#FFFDFC] px-3 py-2.5 text-[#352B28] outline-none placeholder:text-[#514741] focus:border-[#783322] focus:ring-2 focus:ring-[#783322]"
                         />
                     </div>
 
@@ -95,7 +95,7 @@ export default function RegisterPage() {
                             onChange={(event) => setEmail(event.target.value)}
                             required
                             placeholder="you@example.com"
-                            className="w-full rounded-lg border border-[#EBC8BA] bg-[#FFFDFC] px-3 py-2.5 text-[#352B28] outline-none placeholder:text-[#746963]/60 focus:border-[#C96F52] focus:ring-2 focus:ring-[#C96F52]/20"
+                            className="w-full rounded-lg border border-[#EBC8BA] bg-[#FFFDFC] px-3 py-2.5 text-[#352B28] outline-none placeholder:text-[#514741] focus:border-[#783322] focus:ring-2 focus:ring-[#783322]"
                         />
                     </div>
 
@@ -114,12 +114,12 @@ export default function RegisterPage() {
                             onChange={(event) => setPassword(event.target.value)}
                             required
                             placeholder="Create a password"
-                            className="w-full rounded-lg border border-[#EBC8BA] bg-[#FFFDFC] px-3 py-2.5 text-[#352B28] outline-none placeholder:text-[#746963]/60 focus:border-[#C96F52] focus:ring-2 focus:ring-[#C96F52]/20"
+                            className="w-full rounded-lg border border-[#EBC8BA] bg-[#FFFDFC] px-3 py-2.5 text-[#352B28] outline-none placeholder:text-[#514741] focus:border-[#783322] focus:ring-2 focus:ring-[#783322]"
                         />
                     </div>
 
                     {error && (
-                        <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                        <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
                             {error}
                         </p>
                     )}
@@ -127,17 +127,17 @@ export default function RegisterPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full rounded-lg bg-[#C96F52] px-4 py-2.5 font-semibold text-[#FFFDFC] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="w-full rounded-lg bg-[#783322] px-4 py-2.5 font-semibold text-[#FFFDFC] transition-colors hover:bg-[#5C2618] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#783322] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         {loading ? "Creating account..." : "Create Account"}
                     </button>
                 </form>
 
-                <p className="mt-6 text-center text-sm text-[#746963]">
+                <p className="mt-6 text-center text-sm text-[#514741]">
                     Already have an account?{" "}
                     <Link
                         href="/login"
-                        className="font-semibold text-[#C96F52] hover:underline"
+                        className="font-semibold text-[#783322] hover:underline"
                     >
                         Sign In
                     </Link>

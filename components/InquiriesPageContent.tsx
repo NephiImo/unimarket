@@ -16,7 +16,7 @@ export default function InquiriesPageContent({
             Received inquiries
           </h1>
 
-          <p className="mt-2 text-[#64748B]">
+          <p className="mt-2 text-[#514741]">
             Messages from students interested in your listings.
           </p>
         </header>

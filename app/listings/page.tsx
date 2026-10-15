@@ -25,7 +25,7 @@ export default async function ListingsPage({
           Browse Listings
         </h1>
 
-        <p className="mt-2 text-[#746963]">
+        <p className="mt-2 text-[#514741]">
           Find items being sold by students on UniMarket.
         </p>
       </div>
@@ -48,7 +48,7 @@ export default async function ListingsPage({
             type="search"
             defaultValue={params.query ?? ""}
             placeholder="Search by listing title"
-            className="w-full rounded-lg border border-[#D8C9C1] bg-white px-3 py-2 text-[#352B28] outline-none focus:border-[#C96F52]"
+            className="w-full rounded-lg border border-[#D8C9C1] bg-white px-3 py-2 text-[#352B28] outline-none placeholder:text-[#514741] focus:border-[#783322]"
           />
         </div>
 
@@ -64,7 +64,7 @@ export default async function ListingsPage({
             id="category"
             name="category"
             defaultValue={params.category ?? ""}
-            className="w-full rounded-lg border border-[#D8C9C1] bg-white px-3 py-2 text-[#352B28] outline-none focus:border-[#C96F52]"
+            className="w-full rounded-lg border border-[#D8C9C1] bg-white px-3 py-2 text-[#352B28] outline-none focus:border-[#783322]"
           >
             <option value="">All categories</option>
             <option value="Electronics">Electronics</option>
@@ -80,7 +80,7 @@ export default async function ListingsPage({
         <div className="flex items-end">
           <button
             type="submit"
-            className="w-full rounded-lg bg-[#C96F52] px-5 py-2 font-medium text-white transition-opacity hover:opacity-90"
+            className="w-full rounded-lg bg-[#783322] px-5 py-2 font-medium text-white transition-colors hover:bg-[#5C2618]"
           >
             Apply Filters
           </button>
@@ -93,7 +93,7 @@ export default async function ListingsPage({
             No listings found
           </h2>
 
-          <p className="mt-2 text-[#746963]">
+          <p className="mt-2 text-[#514741]">
             Try a different search or category.
           </p>
         </div>

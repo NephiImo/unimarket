@@ -12,7 +12,7 @@ export default function ReceivedInquiries({
       <div className="rounded-lg border border-[#E2E8F0] bg-white p-6 text-center">
         <h2 className="font-semibold text-[#352B28]">No inquiries yet</h2>
 
-        <p className="mt-1 text-sm text-[#64748B]">
+        <p className="mt-1 text-sm text-[#514741]">
           Messages from interested buyers will appear here.
         </p>
       </div>
@@ -42,12 +42,12 @@ export default function ReceivedInquiries({
                   {inquiry.listing_title}
                 </h2>
 
-                <p className="text-sm text-[#64748B]">
+                <p className="text-sm text-[#514741]">
                   From {inquiry.sender_name}
                 </p>
               </div>
 
-              <time className="text-sm text-[#64748B]">
+              <time className="text-sm text-[#514741]">
                 {sentAt}
               </time>
             </div>
