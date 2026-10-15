@@ -1,7 +1,8 @@
 
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/auth/get-current-user";
-import { createSellerResponse } from "@/app/lib/inquiries/queries";
+import { createSellerResponse, getInquiryForParticipant } from "@/app/lib/inquiries/queries";
+import { isInquiryId, validateInquiryText } from "@/app/lib/inquiries/validation";
 
 export async function POST(
     request: Request,
@@ -18,20 +19,26 @@ export async function POST(
         }
 
         const { id } = await context.params;
-        const body = await request.json();
-
-        if (typeof body.response !== "string") {
+        if (!isInquiryId(id)) {
             return NextResponse.json(
-                { error: "A response message is required." },
-                { status: 400 },
+                { error: "Inquiry not found or access denied." },
+                { status: 404 },
             );
         }
 
-        const response = body.response.trim();
-
-        if (!response || response.length > 2000) {
+        const conversation = await getInquiryForParticipant(id, user.id);
+        if (!conversation || conversation.seller_id !== user.id) {
             return NextResponse.json(
-                { error: "Response must be between 1 and 2000 characters." },
+                { error: "Inquiry not found or access denied." },
+                { status: 404 },
+            );
+        }
+
+        const body: unknown = await request.json().catch(() => null);
+        const { value: response, error } = validateInquiryText(body, "response");
+        if (response === null) {
+            return NextResponse.json(
+                { error },
                 { status: 400 },
             );
         }

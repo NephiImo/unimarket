@@ -119,11 +119,7 @@ export default async function DashboardPage({
                                             <p className="mt-2 font-medium text-[#C96F52]">
                                                 ₦
                                                 {Number(
-
-                                                    listing.price,
-
                                                     listing.price
-
                                                 ).toLocaleString("en-NG", {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
@@ -188,7 +184,7 @@ export default async function DashboardPage({
 
                     <Link
                         href="/inquiries/sent"
-                        className="mt-4 inline-block rounded-md bg-[#C96F52] px-5 py-2 font-medium text-white hover:opacity-90"
+                        className="mt-4 inline-block rounded-md bg-[#783322] px-5 py-2 font-medium text-white hover:bg-[#5C2618] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#783322]"
                     >
                         View My Inquiries
                     </Link>

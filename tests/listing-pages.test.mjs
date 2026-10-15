@@ -209,7 +209,10 @@ test('dashboard preserves profile and inquiry navigation alongside owner actions
   assert.match(html, /<button>Delete<\/button>/);
   assert.ok(html.includes('href="/listings/new"'));
   assert.ok(html.includes('href="/inquiries/received"'));
+  assert.ok(html.includes('href="/inquiries/sent"'));
   assert.match(html, /Received Inquiries/);
+  assert.match(html, /My Inquiries/);
+  assert.match(html, /1,200\.50/);
   assert.match(html, /deleted successfully/);
 });
 
@@ -248,6 +251,7 @@ test('empty and failed listing loads preserve the received-inquiries navigation'
       await page({ searchParams: Promise.resolve({}) })
     );
     assert.ok(html.includes('href="/inquiries/received"'));
+    assert.ok(html.includes('href="/inquiries/sent"'));
     assert.ok(!html.includes('INTERNAL_DATABASE_DETAILS'));
     assert.match(
       html,

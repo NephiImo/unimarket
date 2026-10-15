@@ -247,11 +247,14 @@ Run the automated test suite:
 npm test
 ```
 
-Run the database integration tests only against a dedicated test database with the required environment variables configured. These tests create transactional fixtures and roll them back; do not run them against production:
+Run the database integration tests only against a dedicated test database with `TEST_POSTGRES_URL` explicitly configured in the process environment. These tests do not load `.env.local` or fall back to `POSTGRES_URL`; they create transactional fixtures and roll them back. Do not run them against production:
 
 ```bash
 npm run test:db
+node --test tests/inquiry-database.integration.mjs
 ```
+
+See [inquiry chat deployment](docs/inquiry-chat-deployment.md) for schema checks, authorized migration commands, and persistence-test requirements.
 
 Run ESLint:
 

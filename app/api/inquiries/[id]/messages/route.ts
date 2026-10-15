@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/app/lib/auth/get-current-user";
 import {
     createInquiryMessage,
+    getInquiryForParticipant,
     getInquiryMessages,
 } from "@/app/lib/inquiries/queries";
+import { isInquiryId, validateInquiryText } from "@/app/lib/inquiries/validation";
 
 type RouteContext = {
     params: Promise<{ id: string }>;
@@ -24,6 +26,13 @@ export async function GET(
         }
 
         const { id } = await context.params;
+        if (!isInquiryId(id) || !(await getInquiryForParticipant(id, user.id))) {
+            return NextResponse.json(
+                { error: "Inquiry not found or access denied." },
+                { status: 404 },
+            );
+        }
+
         const messages = await getInquiryMessages(id, user.id);
 
         return NextResponse.json(messages);
@@ -52,20 +61,18 @@ export async function POST(
         }
 
         const { id } = await context.params;
-        const body = await request.json();
-
-        if (typeof body.message !== "string") {
+        if (!isInquiryId(id) || !(await getInquiryForParticipant(id, user.id))) {
             return NextResponse.json(
-                { error: "A message is required." },
-                { status: 400 },
+                { error: "Inquiry not found or access denied." },
+                { status: 404 },
             );
         }
 
-        const message = body.message.trim();
-
-        if (!message || message.length > 2000) {
+        const body: unknown = await request.json().catch(() => null);
+        const { value: message, error } = validateInquiryText(body);
+        if (message === null) {
             return NextResponse.json(
-                { error: "Message must be between 1 and 2000 characters." },
+                { error },
                 { status: 400 },
             );
         }
