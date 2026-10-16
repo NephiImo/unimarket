@@ -26,8 +26,24 @@ export async function POST(
         }
 
         const { id } = await context.params;
-        const body = await request.json();
-        const { message } = body;
+        let body: unknown;
+        try {
+            body = await request.json();
+        } catch {
+            return NextResponse.json(
+                { error: "Invalid JSON request body." },
+                { status: 400 },
+            );
+        }
+
+        if (!body || typeof body !== "object" || Array.isArray(body)) {
+            return NextResponse.json(
+                { error: "Inquiry message is required." },
+                { status: 400 },
+            );
+        }
+
+        const { message } = body as Record<string, unknown>;
 
         if (typeof message !== "string" || !message.trim()) {
             return NextResponse.json(

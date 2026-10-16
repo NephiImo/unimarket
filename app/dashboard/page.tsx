@@ -172,6 +172,23 @@ export default async function DashboardPage({
                         View Inquiries
                     </Link>
                 </section>
+
+                <section className="mt-6 rounded-lg bg-white p-6 shadow-sm">
+                    <h2 className="text-xl font-semibold text-gray-900">
+                        My Inquiries
+                    </h2>
+
+                    <p className="mt-2 text-gray-600">
+                        View inquiries you have sent and responses from sellers.
+                    </p>
+
+                    <Link
+                        href="/inquiries/sent"
+                        className="mt-4 inline-block rounded-md bg-[#783322] px-5 py-2 font-medium text-white hover:bg-[#5C2618] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#783322]"
+                    >
+                        View My Inquiries
+                    </Link>
+                </section>
             </div>
         </main>
     );

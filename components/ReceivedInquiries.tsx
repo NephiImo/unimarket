@@ -1,11 +1,15 @@
 import type { ReceivedInquiry } from "@/app/lib/inquiries/queries";
+import SellerResponseForm from "@/components/SellerResponseForm";
+import InquiryChat from "@/components/InquiryChat";
 
 interface ReceivedInquiriesProps {
   inquiries: ReceivedInquiry[];
+  currentUserId: string;
 }
 
 export default function ReceivedInquiries({
   inquiries,
+  currentUserId,
 }: ReceivedInquiriesProps) {
   if (inquiries.length === 0) {
     return (
@@ -55,6 +59,16 @@ export default function ReceivedInquiries({
             <p className="mt-4 whitespace-pre-line text-[#352B28]">
               {inquiry.message}
             </p>
+
+            <SellerResponseForm
+              inquiryId={inquiry.id}
+              existingResponse={inquiry.seller_response}
+            />
+
+            <InquiryChat
+              inquiryId={inquiry.id}
+              currentUserId={currentUserId}
+            />
           </article>
         );
       })}

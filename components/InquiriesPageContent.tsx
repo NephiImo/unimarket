@@ -3,10 +3,12 @@ import type { ReceivedInquiry } from "@/app/lib/inquiries/queries";
 
 interface InquiriesPageContentProps {
   inquiries: ReceivedInquiry[];
+  currentUserId: string;
 }
 
 export default function InquiriesPageContent({
   inquiries,
+  currentUserId,
 }: InquiriesPageContentProps) {
   return (
     <main className="min-h-screen bg-[#F6F1EA] px-4 py-10">
@@ -21,7 +23,7 @@ export default function InquiriesPageContent({
           </p>
         </header>
 
-        <ReceivedInquiries inquiries={inquiries} />
+        <ReceivedInquiries inquiries={inquiries} currentUserId={currentUserId} />
       </div>
     </main>
   );
