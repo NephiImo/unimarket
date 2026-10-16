@@ -1,6 +1,6 @@
 # UniMarket
 
-UniMarket is a student marketplace that helps university students buy and sell items within their school community. Students can browse listings, post items for sale, manage their listings, and send inquiries to sellers.
+UniMarket is a student marketplace that helps university students buy and sell items within their school community. Students can browse listings, post items for sale, manage their listings, and continue conversations with sellers after an initial inquiry.
 
 ## Team Members
 
@@ -14,7 +14,7 @@ UniMarket is a student marketplace that helps university students buy and sell i
 
 Buying and selling within a student community can be inconvenient when listings and conversations are scattered across different platforms. UniMarket brings item discovery, listing management, and buyer-seller communication together in one application.
 
-The application provides user accounts, searchable listings, listing management, editable profiles with saved contact preferences, and listing inquiries. It is designed to make it easier for students to find items, advertise products, and contact potential sellers.
+The application provides user accounts, searchable listings, listing management, editable profiles with saved contact preferences, and buyer-seller conversations that continue after an initial listing inquiry. It is designed to make it easier for students to find items, advertise products, and contact potential sellers.
 
 ## Technology Stack
 
@@ -59,9 +59,15 @@ Profile updates were merged through [PR #45](https://github.com/NephiImo/unimark
 
 ### Buyer and Seller Inquiries
 
-- Send an inquiry about a listing
-- View inquiries received by sellers
-- Restrict received inquiries to the authenticated listing owner
+- Send an inquiry about an available listing and view personal sent inquiries
+- View inquiries received for listings owned by the signed-in seller
+- Submit a one-time initial seller response and view it alongside the original inquiry
+- Exchange additional messages through two-way buyer-seller chat
+- View saved message history with sender labels and timestamps, including after refreshing the page
+- Restrict conversation access to the inquiry's buyer and the listing owner, with server-side authorization and session-derived sender IDs
+- Retain participant access to existing conversations after a listing is soft-deleted
+
+Two-way inquiry chat was merged through [PR #47](https://github.com/NephiImo/unimarket/pull/47). Open conversations refresh through HTTP polling approximately every 12 seconds while the browser tab is visible. The initial seller-response card is loaded with the page and may require a page refresh to show a new response.
 
 ### Accessibility
 
@@ -70,12 +76,6 @@ Profile updates were merged through [PR #45](https://github.com/NephiImo/unimark
 - Visible keyboard-focus outlines and stronger form-control focus rings
 
 These improvements were merged through [PR #50](https://github.com/NephiImo/unimarket/pull/50). See the [W06 color contrast audit](docs/w06-color-contrast.md) for measured color pairs and the remaining manual checks.
-
-## Features Under Review
-
-These features are proposed in open pull requests and are not yet merged into `main`:
-
-- [PR #47 — Two-way inquiry chat](https://github.com/NephiImo/unimarket/pull/47): buyer sent-inquiries pages (`/inquiries/sent`), seller responses, and ongoing buyer/seller conversations. This includes conversation APIs and an `inquiry_messages` migration.
 
 ## Application Routes
 
@@ -89,6 +89,7 @@ The application uses the Next.js App Router. These are the user-facing pages cur
 | `/listings/new` | Create a listing |
 | `/listings/[id]/edit` | Edit a listing |
 | `/dashboard` | User dashboard and profile |
+| `/inquiries/sent` | View personal sent inquiries, seller responses, and conversations |
 | `/inquiries/received` | View inquiries received by the user |
 | `/login` | Sign in |
 | `/register` | Create an account |
@@ -132,22 +133,19 @@ Both endpoints require a session and operate only on the current user's account.
 |---|---|---|
 | POST | `/api/listings/[id]/inquiries` | Send an inquiry about a listing |
 | GET | `/api/inquiries/received` | Retrieve inquiries received by the current user |
+| GET | `/api/inquiries/[id]/messages` | Retrieve message history for a conversation participant |
+| POST | `/api/inquiries/[id]/messages` | Send a message as the authenticated buyer or seller |
+| POST | `/api/inquiries/[id]/response` | Submit the listing owner's one-time initial response |
 
-Protected operations require session authentication and server-side authorization. Listing updates and deletion are owner-only; received inquiries are visible only to the listing owner.
+Protected operations require session authentication and server-side authorization. Listing updates and deletion are owner-only; received inquiries and initial seller responses are restricted to the listing owner. Conversation reads and messages are restricted to the buyer who created the inquiry and the listing owner.
 
-### APIs Under Review
+Chat messages use a `{ message }` request body; initial seller responses use `{ response }`. Both require non-empty text of at most 2,000 characters after trimming. The original listing-inquiry endpoint retains its 1,000-character limit.
 
-These endpoints are introduced by open PRs and are not available in merged `main` yet:
-
-| PR | Method | Endpoint | Proposed behavior |
-|---|---|---|---|
-| #47 | GET | `/api/inquiries/[id]/messages` | Retrieve messages in an inquiry conversation |
-| #47 | POST | `/api/inquiries/[id]/messages` | Send a message in an inquiry conversation |
-| #47 | POST | `/api/inquiries/[id]/response` | Submit a seller response |
+The conversation endpoints return `401` for unauthenticated requests and `404` for unavailable or unauthorized conversations. An authorized conversation with no messages returns `200` with an empty list. Invalid message or response input returns `400`; sender identity comes from the session rather than request data.
 
 ## Database and Data Model
 
-UniMarket uses PostgreSQL to store application data. The merged schema has four core tables: `users`, `listings`, `categories`, and `inquiries`.
+UniMarket uses PostgreSQL to store application data. The merged data model has five core tables: `users`, `listings`, `categories`, `inquiries`, and `inquiry_messages`.
 
 ### Users
 
@@ -173,11 +171,13 @@ Represents a buyer's inquiry about a listing.
 
 Each inquiry is associated with a listing and the user who sent it. Inquiries support communication between buyers and sellers.
 
-### Inquiry Messages (Under Review)
+The nullable `seller_response` (`TEXT`) and `responded_at` (`TIMESTAMP`) columns store the seller's one-time initial response and its timestamp. The original inquiry and initial response remain separate from subsequent chat messages.
 
-PR #47 proposes an `inquiry_messages` table to store conversation messages, including the associated inquiry, sender, message content, and creation time. This table and its migration belong to the feature still under review.
+### Inquiry Messages
 
-After the feature is approved, confirm that its migration has been applied in the intended environment before relying on this table.
+The `inquiry_messages` table stores subsequent conversation messages: a generated UUID `id`, an `inquiry_id` referencing `inquiries`, a `sender_id` referencing `users`, the `message` text, and a `created_at` timestamp. The `(inquiry_id, created_at)` index supports conversation-history queries.
+
+Both foreign keys use `ON DELETE CASCADE` for hard deletion of the referenced inquiry or user. Listing removal uses soft deletion, preserving existing inquiry and message history for authorized participants. See [inquiry chat deployment](docs/inquiry-chat-deployment.md) for exact column, default, key, and index requirements.
 
 ## Design and User Experience
 
@@ -271,7 +271,7 @@ node scripts/add-contact-preference.mjs
 
 The script uses `POSTGRES_URL` from the environment or `.env.local`. It uses `ADD COLUMN IF NOT EXISTS`; if the column already exists, verify its type, default, nullability, and allowed-value constraint rather than assuming the script repairs its definition. Installation, development startup, and production builds do not run this migration automatically.
 
-Inquiry-response and inquiry-message migrations remain part of PR #47 under review. Do not treat those proposed schema changes as requirements for the current `main` release; review and authorize their use in each intended environment after that feature is approved.
+The merged inquiry feature also requires `inquiries.seller_response`, `inquiries.responded_at`, and the `inquiry_messages` table with its required defaults, keys, and index in the intended database. Follow [inquiry chat deployment](docs/inquiry-chat-deployment.md) for read-only schema checks, migration order, and authorized migration commands. Verify each deployment environment separately. Migrations are not run automatically; if required structures are absent or incompatible, review and authorize the changes before applying them.
 
 ### Run the Development Server
 
@@ -297,6 +297,8 @@ node --test tests/inquiry-database.integration.mjs
 ```
 
 See [inquiry chat deployment](docs/inquiry-chat-deployment.md) for schema checks, authorized migration commands, and persistence-test requirements.
+
+The dedicated PostgreSQL integration suites were skipped during the pre-merge review because `TEST_POSTGRES_URL` was unavailable. Passing unit and mocked API/query tests does not establish database persistence or completed browser verification.
 
 Run ESLint:
 
@@ -335,13 +337,12 @@ UniMarket requires a hosting environment that supports Next.js and can connect s
 Before deploying:
 
 1. Configure `POSTGRES_URL` and `AUTH_SECRET` in the hosting provider.
-2. Ensure the database has the merged application's required schema, including `users.contact_preference`; verify the profile migration separately for each deployment environment.
+2. Ensure the database has the merged application's required schema, including `users.contact_preference`, both inquiry-response columns, and `inquiry_messages`. Use the read-only checks in [inquiry chat deployment](docs/inquiry-chat-deployment.md) before applying any separately authorized migrations.
 3. Run the production build and resolve any build errors.
 4. Deploy the application.
 5. Test registration, login, logout, listing operations, inquiry submission, and received inquiries on the deployed application. Verify display-name and contact-preference updates persist after refreshing the dashboard.
-6. Check text contrast in interactive states and keyboard focus visibility across the deployed pages, alongside the remaining checks in the [W06 audit](docs/w06-color-contrast.md).
-
-Two-way inquiry messaging remains under review in PR #47 and is not part of the current merged release. Verify that feature separately after it is merged and its approved migrations are applied.
+6. Using approved test accounts and fixtures, verify the buyer's sent inquiries, the seller's received inquiries and initial response, messages in both directions, and history after refreshing. Confirm unrelated users cannot access the conversation and invalid messages are rejected. Do not create or modify production records automatically for these checks.
+7. Check text contrast in interactive states and keyboard focus visibility across the deployed pages, alongside the remaining checks in the [W06 audit](docs/w06-color-contrast.md).
 
 **Live application:** [UniMarket](https://unimarket-psi.vercel.app)
 
@@ -353,7 +354,7 @@ Current limitations and remaining verification:
 
 - The W06 contrast changes have measured results, but a complete browser accessibility audit is still required; full WCAG conformance has not been established.
 - Contact preferences are saved, but email notifications and preference-driven message delivery are not implemented.
-- Buyer sent-inquiries pages, seller responses, and ongoing inquiry chat remain under review in PR #47.
+- Dedicated PostgreSQL persistence tests and buyer-seller browser checks still require an approved test environment and accounts; the skipped integration suites must not be treated as passing.
 
 Potential areas for continued improvement include:
 
