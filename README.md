@@ -14,7 +14,7 @@ UniMarket is a student marketplace that helps university students buy and sell i
 
 Buying and selling within a student community can be inconvenient when listings and conversations are scattered across different platforms. UniMarket brings item discovery, listing management, and buyer-seller communication together in one application.
 
-The application provides user accounts, searchable listings, listing management, profile information, and listing inquiries. It is designed to make it easier for students to find items, advertise products, and contact potential sellers.
+The application provides user accounts, searchable listings, listing management, editable profiles with saved contact preferences, and listing inquiries. It is designed to make it easier for students to find items, advertise products, and contact potential sellers.
 
 ## Technology Stack
 
@@ -50,8 +50,12 @@ The features below are currently merged into `main`.
 ### Profiles and Dashboard
 
 - View profile information
+- Edit the display name and save a contact preference (`email` or `in_app`)
+- View the account email address as a read-only field
 - Access the user dashboard
 - Manage personal listings
+
+Profile updates were merged through [PR #45](https://github.com/NephiImo/unimarket/pull/45). Contact preferences are stored settings; selecting a preference does not enable email notifications or automatic message delivery.
 
 ### Buyer and Seller Inquiries
 
@@ -59,11 +63,18 @@ The features below are currently merged into `main`.
 - View inquiries received by sellers
 - Restrict received inquiries to the authenticated listing owner
 
+### Accessibility
+
+- Improved text contrast across the homepage, listings, authentication pages, and dashboard
+- Darker button hover states and opaque muted text and placeholders
+- Visible keyboard-focus outlines and stronger form-control focus rings
+
+These improvements were merged through [PR #50](https://github.com/NephiImo/unimarket/pull/50). See the [W06 color contrast audit](docs/w06-color-contrast.md) for measured color pairs and the remaining manual checks.
+
 ## Features Under Review
 
 These features are proposed in open pull requests and are not yet merged into `main`:
 
-- [PR #45 — Profile updates](https://github.com/NephiImo/unimarket/pull/45): save display names and contact preferences through a dashboard profile form and `GET`/`PATCH /api/profile`. Its migration adds `users.contact_preference`; selecting a preference does not implement email notifications or message delivery.
 - [PR #47 — Two-way inquiry chat](https://github.com/NephiImo/unimarket/pull/47): buyer sent-inquiries pages (`/inquiries/sent`), seller responses, and ongoing buyer/seller conversations. This includes conversation APIs and an `inquiry_messages` migration.
 
 ## Application Routes
@@ -84,7 +95,7 @@ The application uses the Next.js App Router. These are the user-facing pages cur
 
 ## API Documentation
 
-The merged API routes use the Next.js App Router to handle authentication, listing operations, and inquiries.
+The merged API routes use the Next.js App Router to handle authentication, profiles, listing operations, and inquiries.
 
 ### Authentication
 
@@ -93,6 +104,17 @@ The merged API routes use the Next.js App Router to handle authentication, listi
 | POST | `/api/auth/register` | Register a user |
 | POST | `/api/auth/login` | Authenticate a user |
 | POST | `/api/auth/logout` | End the user's session |
+
+### Profiles
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/profile` | Retrieve the authenticated user's profile |
+| PATCH | `/api/profile` | Update the authenticated user's display name and contact preference |
+
+Both endpoints require a session and operate only on the current user's account. Successful responses contain `{ profile: { id, name, email, contact_preference } }`; password hashes are excluded.
+
+`PATCH` requires both `name` and `contactPreference`. The display name is trimmed and must contain 1–100 characters; the preference must be `email` or `in_app`. Email and password changes are not supported by this endpoint. Malformed or invalid input returns `400`, unauthenticated requests return `401`, and a missing profile returns `404`.
 
 ### Listings
 
@@ -119,8 +141,6 @@ These endpoints are introduced by open PRs and are not available in merged `main
 
 | PR | Method | Endpoint | Proposed behavior |
 |---|---|---|---|
-| #45 | GET | `/api/profile` | Retrieve the authenticated user's profile information |
-| #45 | PATCH | `/api/profile` | Update the authenticated user's display name and contact preference |
 | #47 | GET | `/api/inquiries/[id]/messages` | Retrieve messages in an inquiry conversation |
 | #47 | POST | `/api/inquiries/[id]/messages` | Send a message in an inquiry conversation |
 | #47 | POST | `/api/inquiries/[id]/response` | Submit a seller response |
@@ -132,6 +152,8 @@ UniMarket uses PostgreSQL to store application data. The merged schema has four 
 ### Users
 
 Stores user account information, including identity and authentication-related data.
+
+The merged profile feature also requires `users.contact_preference`: `VARCHAR(20) NOT NULL DEFAULT 'email'`, constrained to `email` or `in_app`. When the column is added by the provided migration, existing accounts receive `email`; new registrations use the same database default.
 
 A user can own multiple listings and send multiple inquiries.
 
@@ -164,10 +186,22 @@ UniMarket uses a warm, consistent visual style intended to make browsing and man
 ### Color Palette
 
 - Soft Ivory: `#FFFDFC`
-- Muted Terracotta: `#C96F52`
+- Decorative Terracotta: `#C96F52`
+- Terracotta Text and CTA Backgrounds: `#783322` (CTA hover: `#5C2618`)
 - Cocoa Brown: `#352B28`
-- Muted Text: `#746963`
+- Muted Text and Placeholders: `#514741`
+- Sage Text and Availability Badge Background: `#3A5634`
+- Listing Category Badge Text: `#503A45`
+- HowItWorks Background: `#422B35`
 - Blush Peach: `#EBC8BA`
+
+Decorative colors, pastel borders, and translucent backgrounds remain part of the design. The HowItWorks section retains peach labels on its darker plum background.
+
+### Contrast and Keyboard Focus
+
+The updated text pairs measured in the [W06 audit](docs/w06-color-contrast.md) exceed 7:1, including default and hover states. A global 2px focus-visible outline with a 3px offset and explicit component focus styles improve keyboard focus visibility.
+
+These measured improvements do not establish full WCAG AA or AAA conformance. Browser checks for responsive layouts, zoom, focus clipping or obscuration, validation states, and unchanged non-text boundaries remain outstanding.
 
 ### Typography and Layout
 
@@ -229,7 +263,15 @@ Use the correct credentials for your development database. Never commit `.env.lo
 
 Ensure the PostgreSQL database is available and that the application's required schema and migrations have been applied before testing database-dependent features.
 
-See the [documented database schema](docs/database-schema.md) for the merged tables and relationships. Contact-preference migrations belong to PR #45; inquiry-response and inquiry-message migrations belong to PR #47. Review and approve those changes before applying their migrations to an intended environment.
+See the [documented database schema](docs/database-schema.md) for the core tables and relationships. The merged profile feature requires the contact-preference column described above. For a database without that column, review the intended environment and apply the merged migration from the project root:
+
+```bash
+node scripts/add-contact-preference.mjs
+```
+
+The script uses `POSTGRES_URL` from the environment or `.env.local`. It uses `ADD COLUMN IF NOT EXISTS`; if the column already exists, verify its type, default, nullability, and allowed-value constraint rather than assuming the script repairs its definition. Installation, development startup, and production builds do not run this migration automatically.
+
+Inquiry-response and inquiry-message migrations remain part of PR #47 under review. Do not treat those proposed schema changes as requirements for the current `main` release; review and authorize their use in each intended environment after that feature is approved.
 
 ### Run the Development Server
 
@@ -293,18 +335,25 @@ UniMarket requires a hosting environment that supports Next.js and can connect s
 Before deploying:
 
 1. Configure `POSTGRES_URL` and `AUTH_SECRET` in the hosting provider.
-2. Ensure the production database schema and migrations are up to date.
+2. Ensure the database has the merged application's required schema, including `users.contact_preference`; verify the profile migration separately for each deployment environment.
 3. Run the production build and resolve any build errors.
 4. Deploy the application.
-5. Test registration, login, logout, listing operations, inquiry submission, and received inquiries on the deployed application.
+5. Test registration, login, logout, listing operations, inquiry submission, and received inquiries on the deployed application. Verify display-name and contact-preference updates persist after refreshing the dashboard.
+6. Check text contrast in interactive states and keyboard focus visibility across the deployed pages, alongside the remaining checks in the [W06 audit](docs/w06-color-contrast.md).
 
-Verify profile updates and two-way messaging after PR #45 and PR #47 are merged and their approved migrations are applied.
+Two-way inquiry messaging remains under review in PR #47 and is not part of the current merged release. Verify that feature separately after it is merged and its approved migrations are applied.
 
 **Live application:** [UniMarket](https://unimarket-psi.vercel.app)
 
 **GitHub repository:** [NephiImo/unimarket](https://github.com/NephiImo/unimarket)
 
 ## Known Issues and Future Improvements
+
+Current limitations and remaining verification:
+
+- The W06 contrast changes have measured results, but a complete browser accessibility audit is still required; full WCAG conformance has not been established.
+- Contact preferences are saved, but email notifications and preference-driven message delivery are not implemented.
+- Buyer sent-inquiries pages, seller responses, and ongoing inquiry chat remain under review in PR #47.
 
 Potential areas for continued improvement include:
 
@@ -313,7 +362,7 @@ Potential areas for continued improvement include:
 - Expanding automated tests for authentication, listing operations, and inquiry messaging.
 - Improving the messaging experience and adding useful conversation-management features.
 
-These are potential improvement areas, not a confirmed list of outstanding defects. Update this section to reflect the issues and improvements that remain after the final application review.
+The improvement areas are not a confirmed list of defects. Update this section as manual verification is completed and reviewed features are merged.
 
 ## Project Maintenance
 
