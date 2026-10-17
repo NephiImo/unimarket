@@ -9,6 +9,7 @@ UniMarket is a student marketplace that helps university students buy and sell i
 - Ariane Arias Peralta
 - Assumpta Chidinma Okpanachi
 - Martha Sibiya
+- Prosper Chibuzor Opara
 
 ## Project Description
 
